@@ -7,58 +7,92 @@ const pdf = require("html-pdf");
 const nodemailer = require("nodemailer");
 const path = require("node:path");
 const mailer = require("../templates/signup-mail");
+const Usuario = require("../models/usuarios");
 
-const getregistro = async (req, res) => {};
+const getproceso = async (req, res) => {
+	const data = await Proceso.findAll();
+
+	res.status(200).json({
+		ok: true,
+		proceso: data,
+	});
+};
+
+const getByProceso = async (req, res) => {
+	const { termino } = req.params;
+
+	const dataCA = termino.replace(/\w\S*/g, function (e) {
+		return e.charAt(0).toUpperCase() + e.substring(1);
+	});
+
+	const data = await Proceso.findAll({
+		where: {
+			codigo: {
+				[Op.like]: `%${dataCA}%`,
+			},
+		},
+	});
+	res.status(200).json({ ok: true, resultados: data });
+};
 
 const createregistro = async (req, res) => {
-  const {
-    institucion,
-    codigo,
-    linkproceso,
-    tiempoconsumo,
-    determinacion,
-    presupuesto,
-    entregacarpeta,
-    areas,
-    terceraopcion,
-    sistema,
-    equipoprincipal,
-    equipobackup,
-    observacion,
-    licenciaEquiposHematologicos,
-    correo,
-  } = req.body;
+	const user = req.usuario;
+	const {
+		institucion,
+		codigo,
+		linkproceso,
+		tiempoconsumo,
+		determinacion,
+		presupuesto,
+		entregacarpeta,
+		areas,
+		terceraopcion,
+		sistema,
+		equipoprincipal,
+		equipobackup,
+		observacion,
+		licenciaEquiposHematologicos,
+		adjunto,
+		correo,
+	} = req.body;
 
-  const validacodigo = Proceso.findOne({ codigo: codigo });
-  if (validacodigo) {
-    return res
-      .status(400)
-      .json({ msg: "Este codigo que esta ingresando  ya existe" });
-  }
+	const validacodigo = await Proceso.findOne({ codigo: codigo });
+	console.log(`req.body`, req.body);
 
-  const correo2 = correo.replace(/(\r\n|\n|\r)/gm, ";");
+	/* if (validacodigo != null) {
+		return res.status(400).json({ msg: "La orden no se puede registar" });
+	}  */
 
-  const registro = new Proceso({
-    institucion,
-    codigo,
-    linkproceso,
-    tiempoconsumo,
-    determinacion,
-    presupuesto,
-    entregacarpeta,
-    areas,
-    terceraopcion,
-    sistema,
-    equipoprincipal,
-    equipobackup,
-    observacion,
-    licenciaEquiposHematologicos,
-  });
+	if (validacodigo.codigo === codigo) {
+		return res
+			.status(400)
+			.json({ msg: "Este codigo que esta ingresando  ya existe" });
+	}
 
-  await registro.save();
+	const correo2 = correo.replace(/(\r\n|\n|\r)/gm, ";");
+	console.log(`adjunto`, adjunto);
+	const registro = new Proceso({
+		institucion,
+		codigo,
+		linkproceso,
+		tiempoconsumo,
+		determinacion,
+		presupuesto,
+		entregacarpeta,
+		areas,
+		terceraopcion,
+		sistema,
+		equipoprincipal,
+		equipobackup,
+		observacion,
+		usuarioId: user.doctor,
+		licenciaEquiposHematologicos,
+	});
 
-  function createTableRow(equipo, principal, valor, backup, valorBackup) {
-    /*      const equipos = [
+	await registro.save();
+
+	function createTableRow(equipo, principal, valor, backup, valorBackup) {
+		/*      const equipos = [
      
                  { value: 'QUIMICA' },
                  { value: 'INMUNOLOGIA' },
@@ -73,7 +107,7 @@ const createregistro = async (req, res) => {
          
              ]; */
 
-    return `
+		return `
         <tr >
         <td>${equipo}</td>
             <td>${principal}</td>
@@ -82,8 +116,8 @@ const createregistro = async (req, res) => {
             <td>${valorBackup}</td>
         </tr>
         `;
-  }
-  const modeloPDF = `
+	}
+	const modeloPDF = `
     <!Doctype html>
     <html>
         <head>
@@ -189,7 +223,9 @@ const createregistro = async (req, res) => {
                 <h4>Anartz - Ejemplo de cabecera en HTML PDF</h4>
             </div>
             <div id="pageFooter" style="border-top: 1px solid #ddd; padding-top: 5px;">
-                <p style="color: #666; width: 70%; margin: 0; padding-bottom: 5px; text-align: let; font-family: sans-serif; font-size: .65em; float: left;"><a href="https://anartz-mugika.com" target="_blank">https://anartz-mugika.com</a></h4>
+                <p style="color: #666; width: 70%; margin: 0; padding-bottom: 5px; text-align: let; font-family: sans-serif; font-size: .65em; float: left;"><p>Generado por: ${
+									user.doctor
+								}</p></h4>
                 <p style="color: #666; margin: 0; padding-bottom: 5px; text-align: right; font-family: sans-serif; font-size: .65em">Página {{ page }} de {{ pages }}</h4>
             </div>
 
@@ -231,10 +267,10 @@ const createregistro = async (req, res) => {
                 <h4>Areas</h4>
                 <ul>
                     ${areas
-                      .map(function (area) {
-                        return `<li class="li_text">${area.areas}</li>`;
-                      })
-                      .join("")}
+											.map(function (area) {
+												return `<li class="li_text">${area.areas}</li>`;
+											})
+											.join("")}
                 </ul>
             </div>
              <div class="page-break">
@@ -250,34 +286,34 @@ const createregistro = async (req, res) => {
                 </thead>
                 <tbody>
                     ${Object.keys(equipoprincipal)
-                      .map((key) => {
-                        if (key.startsWith("eq")) {
-                          const principal = equipoprincipal[key];
+											.map((key) => {
+												if (key.startsWith("eq")) {
+													const principal = equipoprincipal[key];
 
-                          const valorKey = `val${key.slice(2)}`;
+													const valorKey = `val${key.slice(2)}`;
 
-                          const valor = equipoprincipal[valorKey];
+													const valor = equipoprincipal[valorKey];
 
-                          const equipo = `${valorKey}`
-                            .replace("val", "")
-                            .toUpperCase();
+													const equipo = `${valorKey}`
+														.replace("val", "")
+														.toUpperCase();
 
-                          const backupKey = `bk${key.slice(2)}`;
+													const backupKey = `bk${key.slice(2)}`;
 
-                          const backup = equipobackup[backupKey];
+													const backup = equipobackup[backupKey];
 
-                          const valorBackupKey = `valbk${backupKey.slice(2)}`;
-                          const valorBackup = equipobackup[valorBackupKey];
-                          return createTableRow(
-                            equipo,
-                            principal,
-                            valor,
-                            `${backup}`.replace("undefined", ""),
-                            `${valorBackup}`.replace("undefined", ""),
-                          );
-                        }
-                      })
-                      .join("")}
+													const valorBackupKey = `valbk${backupKey.slice(2)}`;
+													const valorBackup = equipobackup[valorBackupKey];
+													return createTableRow(
+														equipo,
+														principal,
+														valor,
+														`${backup}`.replace("undefined", ""),
+														`${valorBackup}`.replace("undefined", "")
+													);
+												}
+											})
+											.join("")}
                 </tbody>
             </table>
             </div>
@@ -289,29 +325,30 @@ const createregistro = async (req, res) => {
             <h4 class="fila">Licencia de equipo hematologico:</h4>
             <ul>
                 ${licenciaEquiposHematologicos
-                  .map(function (obs) {
-                    return `<li class="li_text">${obs.valorinput}</li>`;
-                  })
-                  .join("")}
+									.map(function (obs) {
+										return `<li class="li_text">${obs.valorinput}</li>`;
+									})
+									.join("")}
             </ul>
             <h4 class="fila"> Observacion: </h4>
             <p>${observacion}</P>
+            
         </body>
     </html>
      `;
 
-  const opcionesPDF = {
-    format: "Letter",
-    orientation: "portrait",
-    border: {
-      top: "1px", // default is 0, units: mm, cm, in, px
-      right: "3px",
-      bottom: "2px",
-      left: "3px",
-    },
-  };
+	const opcionesPDF = {
+		format: "Letter",
+		orientation: "portrait",
+		border: {
+			top: "1px", // default is 0, units: mm, cm, in, px
+			right: "3px",
+			bottom: "2px",
+			left: "3px",
+		},
+	};
 
-  /*   pdf.create(modeloPDF, opcionesPDF).toFile('./proceso.pdf', function (err, res) {
+	/*   pdf.create(modeloPDF, opcionesPDF).toFile('./proceso.pdf', function (err, res) {
         if (err) {
             console.log(err);
         } else {
@@ -320,49 +357,75 @@ const createregistro = async (req, res) => {
             //mailer.enviar_mail( res.filename );
         }
     }) */
-  pdf.create(modeloPDF, opcionesPDF).toBuffer((err, buffer) => {
-    const maillist = correo2.split(";");
+	pdf.create(modeloPDF, opcionesPDF).toBuffer((err, buffer) => {
+		const maillist = correo2.split(";");
+		let transporter;
+		if (user.usuario == "stefani.rivas@distprolab.com") {
+			transporter = nodemailer.createTransport({
+				host: "smtp.office365.com",
+				port: 587,
+				secure: false,
+				requireTLS: true,
 
-    let transporter = nodemailer.createTransport({
-      host: "smtp.office365.com",
-      port: 587,
-      secure: false,
-      requireTLS: true,
+				auth: {
+					user: "stefani.rivas@distprolab.com",
+					pass: "D1stprol@B2021",
+				},
+			});
+		} else {
+			transporter = nodemailer.createTransport({
+				host: "smtp.office365.com",
+				port: 587,
+				secure: false,
+				requireTLS: true,
 
-      auth: {
-        user: process.env.MAILUSER,
-        pass: process.env.MAILPSSWD,
-      },
-    });
-    let mail_options = {
-      from: '"SISTEMAS" <christian.solano@distprolab.com>',
-      to: maillist,
+				auth: {
+					user: "christian.solano@distprolab.com",
+					pass: "D1stprol@2021",
+				},
+			});
+		}
+		const obtenerCodigo = codigo.split("-");
+		console.log(`obtener codigo`, obtenerCodigo);
+		let mail_options = {
+			from: '"SISTEMAS" <christian.solano@distprolab.com>',
+			to: maillist,
 
-      subject: `ADJUNTO PDF`,
-      attachments: [
-        {
-          filename: "reporte.pdf",
-          content: buffer,
-        },
-      ],
-    };
-    transporter.sendMail(mail_options, (error, info) => {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Correo se envió con éxito: " + info.response);
-      }
-    });
-  });
-  //res.status(201).json({ msg: 'Se guardo con exito ' });
+			subject:
+				obtenerCodigo[0] === "SIE"
+					? `RENTABILIDAD - ${institucion} - ${codigo}`
+					: obtenerCodigo[0] === "NIC"
+					? `INFIMA CUANTIA - ${institucion} - ${codigo}`
+					: `NECESIDAD DE CONTRATACION - ${institucion} - ${codigo}`,
+			attachments: adjunto.map((s) => s.files),
+
+			/*  [
+				{
+					filename: "reporte.pdf",
+					content: buffer,
+				},
+			], */
+		};
+		transporter.sendMail(mail_options, (error, info) => {
+			if (error) {
+				console.log(error);
+			} else {
+				// console.log("Correo se envió con éxito: " + info.response);
+				res.status(201).json({
+					ok: true,
+					msg: `Se ha registrado con exito ${codigo}`,
+				});
+			}
+		});
+	});
 };
 
 const updateregistro = async (req, res) => {
-  res.send("update guardada con exito..");
+	res.send("update guardada con exito..");
 };
 
 const usuariosDelete = async (req, res) => {
-  //   res.status(200).json({ msg 'El usuario a sido desactivado con exito...'  });
+	//   res.status(200).json({ msg 'El usuario a sido desactivado con exito...'  });
 };
 
-module.exports = { getregistro, createregistro };
+module.exports = { getproceso, createregistro, getByProceso };

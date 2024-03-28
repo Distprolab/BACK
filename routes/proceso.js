@@ -1,12 +1,14 @@
 const { Router } = require("express");
-const { createregistro } = require("../controllers/Proceso");
+
 const { validarJWT } = require("../middleware/validar-jwt");
 const { tieneRole } = require("../middleware/validar-roles");
 const { validarCampos } = require("../middleware/validar-campos");
 const { check } = require("express-validator");
+const { createregistro, getproceso, getByProceso } = require("../controllers/proceso");
 
 const router = Router();
-
+router.get("/", getproceso)
+router.get("/:termino", getByProceso)
 router.post(
   "/",
   validarJWT,

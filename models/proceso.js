@@ -61,7 +61,7 @@ Proceso.init(
         );
       },
     },
-
+    usuarioId:DataTypes.STRING,
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
   },
 

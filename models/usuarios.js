@@ -1,25 +1,24 @@
-const { Sequelize, DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
+const sequelize = require("../db/connection");
 
-const db = require("../db/connection");
-
-const Usuario = db.define(
-  "Usuario",
+class Usuario extends Model{}
+  Usuario.init(
   {
-    doctor: {
-      type: DataTypes.STRING,
-    },
-    codigo_doctor: {
-      type: DataTypes.STRING,
-    },
-    usuario: {
-      type: DataTypes.STRING,
-    },
-    password: {
-      type: DataTypes.STRING,
-    },
-    rol: {
-      type: DataTypes.STRING,
-    },
+    doctor:
+       DataTypes.STRING,
+    
+    codigo_doctor: 
+       DataTypes.STRING,
+    
+    usuario: 
+      DataTypes.STRING,
+    
+    password: 
+       DataTypes.STRING,
+    
+    rol: 
+      DataTypes.STRING,
+    
 
     estado: {
       type: DataTypes.BOOLEAN,
@@ -28,14 +27,10 @@ const Usuario = db.define(
   },
 
   {
-    freezeTableName: true,
-    tableName: "usuarios",
-    timestamps: false,
+   sequelize,
+   modelName: "usuarios",
+   timestamps: false,
   },
 );
-// UsuarioSchema.methods.toJSON = function() {
-//  const { __v, password, id, ...usuario  } = this.toObject();
-//    usuario.uid = _id;
-//   return usuario;
-/// }
+
 module.exports = Usuario;

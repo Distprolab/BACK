@@ -4,7 +4,7 @@ const moment = require("moment-timezone");
 
 // Configura la zona horaria a 'America/Guayaquil' (o la zona horaria que desees)
 moment.tz.setDefault("America/Guayaquil");
-const db = new Sequelize("SIS", "root", "admin1234", {
+const db = new Sequelize("OE", "root", "admin1234", {
   host: "localhost",
   dialect: "mysql",
 });
