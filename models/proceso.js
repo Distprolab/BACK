@@ -46,7 +46,7 @@ Proceso.init(
         this.setDataValue("equipobackup", JSON.stringify(value));
       },
     },
-    observacion: DataTypes.STRING,
+    observacion: DataTypes.TEXT('long'),
     licenciaEquiposHematologicos: {
       type: DataTypes.TEXT,
       allowNull: false,

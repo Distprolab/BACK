@@ -29,7 +29,7 @@ router.post(
     check("sistema", "El sistema es obligatorio").not().isEmpty(),
     check("terceraopcion", "la tercera opcion es obligatorio").not().isEmpty(),
     check("observacion", "la obeservacion es obligatorio").not().isEmpty(),
-    check("correo", "El correo es obligatorio").not().isEmpty(),
+  
     /* check('licenciaEquiposHematologicos', 'El OBSERVACIONES es obligatorio').not().isEmpty(), */
     /* check('equipoprincipal.eqquimica', 'El CODEXAMEN es obligatorio').not().isEmpty(),
     check('equipobackup.', 'El EXAMEN es obligatorio').not().isEmpty(), */

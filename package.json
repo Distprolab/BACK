@@ -6,6 +6,7 @@
     "axios": "^0.24.0",
     "axios-cookiejar-support": "^2.0.3",
     "bcryptjs": "^2.4.3",
+    "convert-csv-to-json": "^2.44.0",
     "cookie-parser": "^1.4.6",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
