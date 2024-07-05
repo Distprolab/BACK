@@ -30,7 +30,7 @@ const sala = async (req, res) => {
     soap_method: "GetList",
     pstrSessionKey: `${tokenResult}`,
     pstrDemographicCode: "",
-    pstrDemographicName: "Doctor",
+    pstrDemographicName: "Dependiente",
     pstrValueCode: "",
     pstrDescription: "",
     pintStatus: 1,

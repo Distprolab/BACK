@@ -17,20 +17,13 @@ const getProductos = async (req, res) => {
 };
 
 const getByProductos = async (req, res) => {
-	/* 	const { termino } = req.params;
-console.log(termino)
-	const dataCA = termino.replace(/\w\S/g, function (e) {
-		return e.charAt(0).toUpperCase() + e.substring(1);
-	});
+	const { id } = req.params;
 
-	const data = await Proceso.findAll({
-		where: {
-			institucion: {
-				[Op.like]: `%${dataCA}%`,
-			},
-		},
+	const productos = await Producto.findByPk(id);
+	res.status(200).json({
+		ok: true,
+		productos: productos,
 	});
-	res.status(200).json({ ok: true, resultados: data }); */
 };
 
 const createProductos = async (req, res) => {
@@ -41,6 +34,7 @@ const createProductos = async (req, res) => {
 	let fileInputName = req.file.path;
 
 	let json = csvToJson.getJsonFromCsv(fileInputName);
+	console.log(json);
 	let productosGuardados = [];
 	let productosDuplicados = [];
 	for (const jsondata of json) {

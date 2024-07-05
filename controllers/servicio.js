@@ -29,9 +29,9 @@ const servicio = async (req, res) => {
   let params = {
     soap_method: "GetList",
     pstrSessionKey: `${tokenResult}`,
-    /*    'pstrDemographicCode':'OR_SERVICE', */
+       pstrDemographicCode:'', 
     pstrDemographicCode: "",
-    pstrDemographicName: "",
+    pstrDemographicName: "Servicio",
     pstrValueCode: "",
     pstrDescription: "",
     pintStatus: 1,

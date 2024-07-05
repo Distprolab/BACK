@@ -11,13 +11,14 @@ const esAdminRole = (req, res = repsonse, next) => {
       });
   }
 
-  const { rol, nombre } = req.usuario;
+  const { rol, doctor } = req.usuario;
   //console.log(rol)
 
-  if (rol != "ADMIN") {
+
+  if (rol != "ADMIN" && rol !='TICS') {
     return res
       .status(401)
-      .json({ msg: `${nombre} no es administrador-no puede hacer esto` });
+      .json({ msg: `${doctor} no es administrador-no puede hacer esto` });
   }
   next();
 };

@@ -30,7 +30,7 @@ const operador = async (req, res) => {
     soap_method: "GetList",
     pstrSessionKey: `${tokenResult}`,
     pstrDemographicCode: "",
-    pstrDemographicName: "Operador",
+    pstrDemographicName: "Activo",
     pstrValueCode: "",
     pstrDescription: "",
     pintStatus: 1,

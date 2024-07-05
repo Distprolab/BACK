@@ -1,11 +1,24 @@
 const { Request, Response } = require("express");
 
 const Roles = require("../models/role");
+const { Op } = require("sequelize");
 
 const consultaroles = async (req, res) => {
-	const rol = await Roles.findAll();
+	if (req.usuario.rol === "TICS") {
+		const rol = await Roles.findAll({
+			where: {
+				rol: {
+					[Op.ne]: "ADMIN",
+				},
+			},
+		});
+		res.json({ ok: true, rol });
+	} else {
+		const rol = await Roles.findAll();
 
 	res.json({ ok: true, rol });
+	}
+	
 };
 
 const usuariosGetID = async (req, res) => {

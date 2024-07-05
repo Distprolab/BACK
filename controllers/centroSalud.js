@@ -30,7 +30,7 @@ const centroSalud = async (req, res) => {
     soap_method: "GetList",
     pstrSessionKey: `${tokenResult}`,
     pstrDemographicCode: "",
-    pstrDemographicName: "Centros de Salud",
+    pstrDemographicName: "Tipo Orden",
     pstrValueCode: "",
     pstrDescription: "",
     pintStatus: 1,

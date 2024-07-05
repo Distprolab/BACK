@@ -18,7 +18,7 @@ const login = async (req, res) => {
   //const usuario=await Usuario.findOne({correo});
   if (!existeuser) {
     return res.status(400).json({
-      msg: "usuario/ password no son correctos",
+      msg: "Las credenciales ingresadas son las correctas",
     });
   }
   //console.log(password)

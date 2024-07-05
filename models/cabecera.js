@@ -11,15 +11,16 @@ Cabecera.init(
     DLCEDU: { type: DataTypes.STRING, allowNull: true },
     DLCPRO: DataTypes.STRING,
     DLCSER: { type: DataTypes.STRING, allowNull: true },
-    DLCMED: { type: DataTypes.STRING, allowNull: true },
-    DLCDIS: { type: DataTypes.STRING, allowNull: true },
+    DLCMED: { type: DataTypes.STRING, allowNull: true },   
     DLNUOR: DataTypes.STRING,
     DLAPEL: { type: DataTypes.STRING, allowNull: true },
-    DLNOMB: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+    DLNOMB: { type: DataTypes.STRING, allowNull: true, defaultValue: null },//
     DLSEXO: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
     DLFECN: { type: DataTypes.STRING, allowNull: true },
     DLHIST: { type: DataTypes.STRING, allowNull: true },
-    DLTIDO: { type: DataTypes.STRING, allowNull: true },
+    DLTIDO: { type: DataTypes.STRING, allowNull: true },       
+    DLCDIS:{type:DataTypes.STRING,allowNull:true},    //
+
     FECHA: { type: DataTypes.STRING, allowNull: true },
     CODIMPRESORA: { type: DataTypes.STRING, allowNull: true },
     NUMEROORDEN: DataTypes.STRING,

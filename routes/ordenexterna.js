@@ -12,6 +12,7 @@ const {
   ordenexternaDelete,
   ordenexternaGetTodos,
   ordenesGetfiltroExterna,
+  ordenexternaById,
 } = require("../controllers/ordenexterna");
 const router = Router();
 
@@ -19,9 +20,12 @@ router.get("/", [validarJWT, tieneRole], ordenexternaGet);
 
 router.get("/todos", [validarJWT, tieneRole], ordenexternaGetTodos);
 
-router.get("/filtros", [validarJWT, tieneRole], ordenesGetfiltroExterna);
 
-router.put("/:id", ordenexternaUpdate);
+router.get("/:id", [validarJWT, tieneRole], ordenexternaById);
+
+router.get("/filtros/externa", [validarJWT, tieneRole], ordenesGetfiltroExterna);
+
+router.put("/:id",[validarJWT, tieneRole], ordenexternaUpdate);
 
 router.post("/", [validarJWT, tieneRole], ordenexternaPost);
 

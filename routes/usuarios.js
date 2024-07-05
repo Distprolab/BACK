@@ -31,9 +31,7 @@ router.put(
     validarJWT,
     esAdminRole,
     check("usuario", "El usuario es obligatorio").not().isEmpty(),
-    check("password", "El password es obligatorio/ min 8 letras").isLength({
-      min: 8,
-    }),
+    check("doctor", "El doctor es obligatorio").not().isEmpty(),
     check("rol").custom(rolValido),
   ],
   usuariosUpdate,

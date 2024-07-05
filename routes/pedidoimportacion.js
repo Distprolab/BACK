@@ -8,12 +8,14 @@ const {
 	getFiltroPedido,
 	deletePedido,
 	getAllPedido,
+	updatePedido,
 } = require("../controllers/pedidoImportacion");
 
 const router = Router();
 router.get("/",[validarJWT, tieneRole], getPedido);
 router.get("/filtros",[validarJWT, tieneRole],getAllPedido)
-router.get("/:termino", [validarJWT, tieneRole],getFiltroPedido);
+router.get("/:id", [validarJWT, tieneRole],getFiltroPedido);
+router.put("/:id", [validarJWT, tieneRole],updatePedido);
 router.post("/",[validarJWT, tieneRole],createPedido);
 router.delete("/:id", [validarJWT, tieneRole], deletePedido);
 

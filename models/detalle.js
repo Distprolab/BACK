@@ -6,7 +6,7 @@ Detalle.init(
   {
     ItemID: DataTypes.INTEGER,
     ItemName: DataTypes.STRING,
-    ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
+    ESTADO: { type: DataTypes.BOOLEAN },
   },
   {
     sequelize,

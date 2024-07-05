@@ -30,7 +30,7 @@ const flebotomista = async (req, res) => {
     soap_method: "GetList",
     pstrSessionKey: `${tokenResult}`,
     pstrDemographicCode: "",
-    pstrDemographicName: "Flebotomista",
+    pstrDemographicName: "Otros",
     pstrValueCode: "",
     pstrDescription: "",
     pintStatus: 1,

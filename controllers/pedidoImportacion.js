@@ -11,9 +11,9 @@ const Marca = require("../models/marca");
 const { Fn } = require("sequelize/lib/utils");
 const getPedido = async (req, res) => {
 	const allPedido = await Pedido.findAll({
-		where: {
-			ESTADO: [1,2],
-		},
+		/* where: {
+			ESTADO: [1, 2],
+		}, */
 		include: [
 			{
 				model: Itempedido,
@@ -65,10 +65,9 @@ const getAllPedido = async (req, res) => {
 				},
 				include: ["items"],
 			});
-			console.log(`ID`, pedidos.length);
+
 			if (pedidos.length == 0) {
 				throw new Error("El rango seleccionado no tiene Informacion");
-
 			}
 
 			await Promise.all(
@@ -82,7 +81,6 @@ const getAllPedido = async (req, res) => {
 
 					await Promise.all(
 						pedido.items.map(async (item) => {
-							console.log(`ITEM`,item)
 							await Itempedido.update(
 								{
 									ESTADO: 2,
@@ -113,39 +111,31 @@ const getAllPedido = async (req, res) => {
 };
 
 const getFiltroPedido = async (req, res) => {
-	/* console.log( req.query)
+	const { id } = req.params;
 
-	const { MARCA}=req.query
- */
-	const data = await Pedido.findAll({
-		where: {
-			ID_PROVEEDOR: {
-				[Op.like]: `%${dataCA}%`,
-			},
-		},
+	const pedido = await Pedido.findByPk(id, {
+		attributes: ["id", "ID_PROVEEDOR", "MARCA"],
 		include: [
 			{
 				model: Itempedido,
 				as: "items",
+				//attributes:["ID_PROVEEDOR","MARCA"]
 				attributes: ["ID_PRODUCTO", "CANTIDAD"],
-				include: [{ model: Producto, as: "product", attributes: ["NOMBRE"] }],
+				include: {
+					model: Producto,
+					as: "product",
+					attributes: { exclude: ["createdAt", "updatedAt", "ESTADO"] },
+				},
 			},
-			{
-				model: Usuario,
-				as: "user",
-				attributes: ["doctor"],
-			},
-			{ model: Cliente, as: "clientes", attributes: ["NOMBRE"] },
-			{ model: Marca, as: "marcas", attributes: ["NOMBRE"] },
 		],
 	});
-	res.status(200).json({ ok: true, pedido: data });
+	res.status(200).json({ ok: true, pedido: pedido });
 };
 
 const createPedido = async (req, res) => {
 	const idUser = req.usuario;
-	const { ID_PROVEEDOR, MARCA, PRODUCTOS } = req.body;
-	console.log(req.body);
+	const { id,ID_PROVEEDOR, MARCA, PRODUCTOS } = req.body;
+	console.log(`aaqui`,req.body);
 	await sequelize.transaction(async (t) => {
 		const pedidos = await Pedido.create(
 			{
@@ -155,6 +145,7 @@ const createPedido = async (req, res) => {
 				userId: idUser.id,
 				clientesId: ID_PROVEEDOR,
 				marcasId: MARCA,
+				pedidosId:id
 			},
 			{ transaction: t }
 		);
@@ -176,14 +167,54 @@ const createPedido = async (req, res) => {
 
 		await pedidos.setItems(itempedidos, { transaction: t });
 	});
-
+ 
 	res.status(201).json({
 		msg: "El pedido a sido registrado con exito",
 	});
 };
 
 const updatePedido = async (req, res) => {
-	res.send("update guardada con exito..");
+	const id = req.body.id;
+	const { ID_PROVEEDOR, MARCA, PRODUCTOS } = req.body;
+	await sequelize.transaction(async (t) => {
+		try {
+			const pedido = await Pedido.findByPk(id);
+			if (!pedido) {
+				throw new Error("No se encontró el pedido ");
+			}
+
+			await Pedido.update(
+				{ ID_PROVEEDOR, MARCA },
+				{ where: { id: id }, transaction: t }
+			);
+
+			await Promise.all(
+				PRODUCTOS.map(async (item) => {
+					const { CANTIDAD } = item;
+					await Itempedido.update(
+						{
+							CANTIDAD,
+						},
+						{
+							where: {
+								pedidoId: id,
+							},
+							transaction:t
+						}
+					);
+				})
+			);
+		} catch (error) {
+			console.log(error)
+		}
+
+		
+	});
+	res.status(200).json({ ok: true, msg: `El pedido ${id} a sido actualizado` }); 
+
+
+
+	
 };
 
 const deletePedido = async (req, res) => {

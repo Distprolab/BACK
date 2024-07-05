@@ -11,6 +11,8 @@ const socketIO = require("socket.io");
 const http = require("http");
 const { desconectar, mensaje } = require("../sockets/sockets");
 const path = require("path");
+const { truncate } = require("fs");
+const { findLastIndex } = require("lodash");
 require("../db/asociations");
 
 //const store=new session.MemoryStore;
@@ -70,6 +72,24 @@ class Server {
 			equipos: "/api/equipos",
 			cliente: "/api/cliente",
 			marca: "/api/marca",
+			stock: "/api/stock",
+			pedidos: "/api/pedidos-stock",
+			cargaUpload: "/api/carga-upload",
+			stockpruebas: "/api/stock-pruebas",
+			/*dashboard*/
+			reparacion: "/api/reparacion",
+			modelo: "/api/modelo",
+			contrato: "/api/contrato",
+			modalidad: "/api/modalidad",
+			solicitudpresupesto: "/api/solicitudpresupuesto",
+			requerimientoequipo: "/api/requerimientoequipo",
+			aprobarprocesos: "/api/aprobacionproceso",
+			ubicacion: "/api/ubicacion",
+			estado: "/api/estado",
+			accesorio: "/api/accesorio",
+			estadofinanciero: "/api/financiero",
+			estadoproceso: "/api/estadoproceso",
+			tipocontrato: "/api/tipocontrato",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -98,7 +118,7 @@ class Server {
 		this.app.use(cookieParser());
 
 		this.app.use(express.json());
-		this.app.use(express.static(path.join(__dirname, 'public')));
+		this.app.use(express.static(path.join(__dirname, "public")));
 		this.app.use(xmlparser());
 
 		this.app.use(express.static("public"));
@@ -180,6 +200,43 @@ class Server {
 		this.app.use(this.paths.equipos, require("../routes/equipos"));
 		this.app.use(this.paths.marca, require("../routes/marca"));
 		this.app.use(this.paths.cliente, require("../routes/cliente"));
+		this.app.use(this.paths.stock, require("../routes/stock"));
+		this.app.use(this.paths.pedidos, require("../routes/pedidoStock"));
+		this.app.use(this.paths.cargaUpload, require("../routes/cargaUpload"));
+		this.app.use(this.paths.stockpruebas, require("../routes/stock-pruebas"));
+
+		/*dashboard*/
+		this.app.use(this.paths.reparacion, require("../routes/reparacion"));
+		this.app.use(this.paths.modelo, require("../routes/modelo"));
+		this.app.use(this.paths.contrato, require("../routes/contrato"));
+		this.app.use(this.paths.modalidad, require("../routes/modalidad"));
+		this.app.use(
+			this.paths.solicitudpresupesto,
+			require("../routes/solicitudpresupuesto")
+		);
+		this.app.use(
+			this.paths.requerimientoequipo,
+			require("../routes/requerimientoequipo")
+		);
+		this.app.use(
+			this.paths.aprobarprocesos,
+			require("../routes/aprobarprocesos")
+		);
+		this.app.use(this.paths.ubicacion, require("../routes/ubicacion"));
+		this.app.use(this.paths.estado, require("../routes/estado"));
+		this.app.use(this.paths.accesorio, require("../routes/accesorio"));
+		this.app.use(
+			this.paths.estadofinanciero,
+			require("../routes/estadofinanciero")
+		);
+		this.app.use(
+			this.paths.tipocontrato,
+			require("../routes/tipocontrato")
+		);
+		this.app.use(
+			this.paths.estadoproceso,
+			require("../routes/estadoproceso")
+		);
 	}
 
 	listen() {
