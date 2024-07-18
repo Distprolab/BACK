@@ -4,13 +4,14 @@ const Roles = require("../models/role");
 const { Op } = require("sequelize");
 const Modelo = require("../models/modelo");
 const Equipos = require("../models/equipos");
+const Analizador = require("../models/analizador");
 
 const consultamodelo = async (req, res) => {
 	const modelo = await Modelo.findAll({
 		include:{
-			model:Equipos,
-			as:"equipos"
-		}
+			model:Analizador,
+			as:"instrumento"
+		} 
 	});
 	res.json({ ok: true, modelo });
 };

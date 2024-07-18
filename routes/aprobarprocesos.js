@@ -9,7 +9,7 @@ const router= Router();
 
 
 
-router.get("/:id");
+router.get("/:id",[validarJWT, tieneRole],);
 router.put("/:id",validarJWT,tieneRole,updateProcesos);
 router.post("/",validarJWT,tieneRole,postProcesos)
 

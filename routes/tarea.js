@@ -16,7 +16,7 @@ const {
 const { ordenT } = require("../controllers/tarea");
 const router = Router();
 
-router.get("/", ordenT);
+router.get("/", [validarJWT, tieneRole],ordenT);
 
 //router.patch('/', usuariosPatch );
 

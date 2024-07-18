@@ -90,6 +90,10 @@ class Server {
 			estadofinanciero: "/api/financiero",
 			estadoproceso: "/api/estadoproceso",
 			tipocontrato: "/api/tipocontrato",
+			analizador: "/api/analizador",
+			accesoriocotizacion: "/api/accesoriocotizacion",
+			cotizacion: "/api/cotizacion",
+			correos: "/api/correos",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -236,6 +240,23 @@ class Server {
 		this.app.use(
 			this.paths.estadoproceso,
 			require("../routes/estadoproceso")
+		);
+		this.app.use(
+			this.paths.analizador,
+			require("../routes/analizador")
+		);
+		this.app.use(
+			this.paths.accesoriocotizacion,
+			require("../routes/accesoriocotizacion")
+		);
+		this.app.use(
+			this.paths.cotizacion,
+			require("../routes/cotizacion")
+		);
+
+		this.app.use(
+			this.paths.correos,
+			require("../routes/correos")
 		);
 	}
 

@@ -6,6 +6,6 @@ const { getpdf } = require("../controllers/pdf");
 
 const router = Router();
 
-router.get("/:id", getpdf);
+router.get("/:id", [validarJWT, tieneRole],getpdf);
 
 module.exports = router;

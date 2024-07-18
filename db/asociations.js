@@ -27,11 +27,15 @@ const Solicitud_Proceso = require("../models/solicitud_proceso");
 const Itemequipo = require("../models/itemEquipo");
 const Estadoproceso = require("../models/estadoproceso");
 const Tipocontrato = require("../models/tipocontrato");
+const Analizador = require("../models/analizador");
 
+/* Producto.hasMany(Stock,{as:"inventario",foreignKey:"productoId"});
+Stock.belongsTo(Producto,{as:"product"}) */
 
+Modelo.hasMany(Analizador, { as: "instrumento", foreignKey: "modeloId" });
+Analizador.belongsTo(Modelo, { as: "modelo" });
 
-
-Tipocontrato.hasMany(Estadoproceso, { as: "status", foreignKey: "tipocontratoId" });
+Tipocontrato.hasMany(Estadoproceso, {as: "status",foreignKey: "tipocontratoId",});
 Estadoproceso.belongsTo(Tipocontrato, { as: "tipocontrato" });
 
 Proceso.hasOne(Estadoproceso, { as: "status", foreignKey: "procesoId" });
@@ -43,13 +47,12 @@ Pedido.belongsTo(Proceso, { as: "tramites" });
 Proceso.hasOne(Aprobar, { as: "aprobar", foreignKey: "procesoId" });
 Aprobar.belongsTo(Proceso, { as: "tramites" });
 
-Proceso.hasOne(Solicitud_Proceso, { as: "solicitud", foreignKey: "solicitudId" });
+Proceso.hasOne(Solicitud_Proceso, {	as: "solicitud",	foreignKey: "solicitudId",});
 Solicitud_Proceso.belongsTo(Proceso, { as: "tramites" });
 
 //Modelo.hasMany(Equipos,{as:"categoria",foreignKey:"modeloId"});
 //Modelo.hasMany(Equipos,{as:"equipos",foreignKey:"equipoId"});
 /* RELACION DE EQUIPOS */
-
 
 Marca.hasMany(Equipos, { as: "equipos", foreignKey: "marcaId" });
 Equipos.belongsTo(Marca, { as: "marca" });
@@ -57,17 +60,13 @@ Equipos.belongsTo(Marca, { as: "marca" });
 Modelo.hasMany(Equipos, { as: "equipos", foreignKey: "modeloId" });
 Equipos.belongsTo(Modelo, { as: "modelo" });
 
-
 Estado.hasMany(Equipos, { as: "equipos", foreignKey: "estadoId" });
 Equipos.belongsTo(Estado, { as: "estado" });
 
 Ubicacion.hasMany(Equipos, { as: "equipos", foreignKey: "ubicacionId" });
 Equipos.belongsTo(Ubicacion, { as: "ubicacion" });
 
-
-
-
-Solicitud_Proceso.hasMany(Itemequipo, { as: "itemequipo", foreignKey: "itemequipoId" });
+Solicitud_Proceso.hasMany(Itemequipo, {	as: "itemequipo",	foreignKey: "itemequipoId",});
 Itemequipo.belongsTo(Solicitud_Proceso, { as: "solicitud" });
 
 Equipos.hasMany(Accesorio, { as: "acc", foreignKey: "equipoId" });
@@ -90,31 +89,24 @@ Pedido.belongsTo(Marca, { as: "marcas" });
 Pedido.hasMany(Itempedido, { as: "items", foreignKey: "pedidoId" });
 Itempedido.belongsTo(Pedido, { as: "pedidos" });
 
-PedidoStock.hasMany(Itempedidostock, {
-	as: "itemstock",
-	foreignKey: "pedidostockId",
-});
+PedidoStock.hasMany(Itempedidostock, {	as: "itemstock",	foreignKey: "pedidostockId",});
 Itempedidostock.belongsTo(PedidoStock, { as: "pedidostock" });
 
 Producto.hasMany(Itempedido, { as: "items", foreignKey: "productoId" });
 Itempedido.belongsTo(Producto, { as: "product" });
 
-Producto.hasMany(Itempedidostock, {
-	as: "itemstock",
-	foreignKey: "productoId",
-});
+Producto.hasMany(Itempedidostock, {	as: "itemstock",	foreignKey: "productoId",});
 Itempedidostock.belongsTo(Producto, { as: "product" });
-
-
-
 
 Cabecera.hasMany(Detalle, { as: "pruebas", foreignKey: "cabeceraId" });
 Detalle.belongsTo(Cabecera, { as: "pacientes" });
 
 Stock.hasMany(ItemStock, { as: "stockItem", foreignKey: "stockId" });
 ItemStock.belongsTo(Stock, { as: "inventario" });
+Producto.hasMany(ItemStock, { as: "stockItem", foreignKey: "productoId" });
+ItemStock.belongsTo(Producto, { as: "product" });
 
-ItemStock.belongsTo(Producto, { foreignKey: "productoId", as: "product" });
+//ItemStock.belongsTo(Producto, { foreignKey: "productoId", as: "product" });
 
 Cabecera_Agen.hasMany(Detalle_Agen, { as: "as400", foreignKey: "cabeceraId" });
 Detalle_Agen.belongsTo(Cabecera_Agen, { as: "personas" });

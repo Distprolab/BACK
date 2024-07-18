@@ -5,12 +5,14 @@ const {
 	postreparacion,
 	consultareparacion,
 } = require("../controllers/reparacion");
+const { validarJWT } = require("../middleware/validar-jwt");
+const { tieneRole } = require("../middleware/validar-roles");
 
 const router = Router();
 
-router.get("/", consultareparacion);
-router.post("/", postreparacion);
-router.put("/:id", reparacionUpdate);
-router.delete("/:id", reparacionDelete);
+router.get("/", [validarJWT, tieneRole],consultareparacion);
+router.post("/", [validarJWT, tieneRole],postreparacion);
+router.put("/:id", [validarJWT, tieneRole],reparacionUpdate);
+router.delete("/:id", [validarJWT, tieneRole],reparacionDelete);
 
 module.exports = router;

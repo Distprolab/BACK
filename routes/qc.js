@@ -9,6 +9,6 @@ const upload = multer({ dest: "downloads/" });
 
 const router = Router();
 
-router.post("/upload", upload.single("file"), getqc);
+router.post("/upload",[validarJWT, tieneRole], upload.single("file"), getqc);
 
 module.exports = router;

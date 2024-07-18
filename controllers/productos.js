@@ -4,6 +4,7 @@ const fs = require("fs");
 const csvToJson = require("convert-csv-to-json");
 const Producto = require("../models/productos");
 const { forIn } = require("lodash");
+const { Op } = require("sequelize");
 const getProductos = async (req, res) => {
 	const productos = await Producto.findAll({
 		where: {
@@ -17,9 +18,23 @@ const getProductos = async (req, res) => {
 };
 
 const getByProductos = async (req, res) => {
-	const { id } = req.params;
+	const { q } = req.params;
+	const dataCA = q.replace(/\w\S*/g, function (e) {
+		return e.charAt(0).toUpperCase() + e.substring(1);
+	});
+	const productos = await Producto.findAll(
+		{
 
-	const productos = await Producto.findByPk(id);
+			where:{
+				NOMBRE:{
+					[Op.like]: `${dataCA}%`
+				}
+			}
+		}
+
+
+
+	);
 	res.status(200).json({
 		ok: true,
 		productos: productos,

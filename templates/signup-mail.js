@@ -48,11 +48,9 @@ this.enviar_mail = (pdf) => {
                         color:black; 
                         text-align:center; 
                         font-size:1.5rem">
-                        Estimado (a)  <br>reciba un cordial  saludo del Laboratorio Novalab.
+                        Estimado (a)  <br> procedio con la recepcion de la guia.
                     <br>
-                        Le comunicamos  que sus resultados ya estan disponibles en el sistema.<br>
-                        
-                        Puede abrirlos desde el siguiente link: </p> 
+                         </p> 
                         
                         <a  style="display:inline-block;
                         background-color:orange;

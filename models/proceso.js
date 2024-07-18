@@ -11,7 +11,7 @@ Proceso.init(
 		determinacion: DataTypes.STRING,
 		presupuesto: DataTypes.STRING,
 		entregacarpeta: DataTypes.STRING,
-		ASIGNADO:DataTypes.INTEGER,
+		//ASIGNADO:DataTypes.INTEGER,
 		areas: {
 			type: DataTypes.TEXT,
 			allowNull: false,

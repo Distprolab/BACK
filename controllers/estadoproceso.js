@@ -10,11 +10,11 @@ const postestadoProceso = async (req, res) => {
 		return res.status(400).json({ msg: "El proceso seleccionado no existe" });
 	}
 	const estadoproceso = new Estadoproceso({
-		PROCESO_ID,
-		ESATADO: PARTICIPACION,
+		//PROCESO_ID,
+		ESATADO: Number(PARTICIPACION),
 		tramitesId: PROCESO_ID,
-		//procesoId: PROCESO_ID,
-		tipocontratoId: PARTICIPACION,
+		procesoId: PROCESO_ID,
+		tipocontratoId:  Number(PARTICIPACION),
 	});
 	await estadoproceso.save();
 

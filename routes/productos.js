@@ -20,8 +20,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 const router = Router();
-router.get("/", getProductos);
-router.get("/:id", [validarJWT, tieneRole], getByProductos);
+router.get("/", [validarJWT, tieneRole],getProductos);
+router.get("/:q", [validarJWT, tieneRole], getByProductos);
 router.post(
 	"/",
 	upload.single("file"),

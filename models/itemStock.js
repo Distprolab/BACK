@@ -17,6 +17,7 @@ ItemStock.init(
 		cantidad_recibida: { type: DataTypes.INTEGER },
 		fabricante: { type: DataTypes.STRING },
 		sanitario: { type: DataTypes.STRING },
+		comentario: { type: DataTypes.STRING },
 		ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
 	},
 	{

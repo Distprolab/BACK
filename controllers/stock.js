@@ -1,25 +1,56 @@
 const { Request, Response } = require("express");
-const { Op, and, Sequelize, fn, col } = require("sequelize");
+const { Op, and, Sequelize, fn, col, Model } = require("sequelize");
 const Usuario = require("../models/usuarios");
 const { sequelize } = require("../models/stock");
 const { Fn } = require("sequelize/lib/utils");
 const Stock = require("../models/stock");
 const ItemStock = require("../models/itemStock");
-
+const Producto = require("../models/productos");
+const Correo = require("../models/correos");
+const nodemailer = require("nodemailer");
+const pdf = require("html-pdf");
 const getStock = async (req, res) => {
-	const allStock = await ItemStock.findAll({
+	const all = await ItemStock.findAll({
+		include: {
+			model: Producto,
+			as: "product",
+		},
 		attributes: [
-			[sequelize.fn("SUM", sequelize.col("CANTIDAD")), "cantidad"],
+			"productId",
 			"referencia",
-			"lote",
 			"caducidad",
+			"lote",
+			[Sequelize.fn("SUM", Sequelize.col("cantidad")), "TOTAL"],
 		],
-		group: ["referencia", "lote", "caducidad"],
+
+		group: ["referencia", "lote", "productId", "caducidad"],
 	});
 
+	// const allStock = await ItemStock.findAll({});
+	const allStock = all.reduce((acc, item) => {
+		//hhconsole.log(`ITEM`, item.product);
+		const referencia = item.referencia;
+		const nombre = item.product.NOMBRE;
+		if (!acc[referencia]) {
+			acc[referencia] = {
+				referencia: referencia,
+				nombre: nombre,
+				detalles: [],
+				total_referencia: 0,
+			};
+		}
+		acc[referencia].detalles.push({
+			lote: item.lote,
+			TOTAL: item.get("TOTAL"),
+			caducidad: item.caducidad,
+		});
+		acc[referencia].total_referencia += Number(item.get("TOTAL"));
+		return acc;
+	}, {});
+	const finalResults = Object.values(allStock);
 	res.status(200).json({
 		ok: true,
-		stock: allStock,
+		stock: finalResults,
 	});
 };
 
@@ -138,8 +169,18 @@ const getFiltroStock = async (req, res) => {
 const createStock = async (req, res) => {
 	const idUser = req.usuario;
 	const { guia, productos } = req.body;
-	console.log(productos);
+	//console.log(productos);
+	const maillist = await Correo.findAll({})
+	console.log(`maillist`,maillist)
+	const validadGuia = await Stock.findOne({ where: { guia: guia } });
+    const attachments=[];
+	//console.log(`validarGuia`, validadGuia);
 
+/* 	if (validadGuia) {
+		return res
+			.status(400)
+			.json({ ok: true, msg: `La guia ${guia} ya fue ingresada` });
+	}
 	await sequelize.transaction(async (t) => {
 		const stocks = await Stock.create(
 			{
@@ -153,8 +194,11 @@ const createStock = async (req, res) => {
 
 		const itemStocks = await Promise.all(
 			productos.map(async (producto) => {
+				const Idproducto = await Producto.findOne({
+					where: { referencia: producto.referencia },
+				});
 				const productoId = producto.id;
-				console.log(productoId);
+				console.log(`kooko`, Idproducto);
 				return await ItemStock.create(
 					{
 						referencia: producto.referencia,
@@ -164,6 +208,8 @@ const createStock = async (req, res) => {
 						cantidad_recibida: producto.cantidad_recibida,
 						fabricante: producto.fabricante,
 						sanitario: producto.sanitario,
+						comentario: producto.comentario,
+						productoId: Idproducto.id,
 					},
 					{ transaction: t }
 				);
@@ -171,8 +217,251 @@ const createStock = async (req, res) => {
 		);
 
 		await stocks.setStockItem(itemStocks, { transaction: t });
-	});
+	});  */
 
+	function createTableRow(
+		referencia,
+		descripcion,
+		lote,
+		caducidad,
+		cantidad,
+		cantidad_recibida,
+		comentario
+	) {
+		return `
+		<tr >
+		<td>${referencia}</td>
+			<td>${descripcion}</td>
+			<td>${lote}</td>
+			<td>${caducidad}</td>
+				<td>${cantidad}</td>
+			<td>${cantidad_recibida}</td>
+			<td>${comentario}</td>
+		</tr>
+		`;
+	}
+	const modeloPDF = `
+	<!Doctype html>
+	<html>
+		<head>
+			<meta charset="utf-8">
+				<title>PDF Result Template</title>
+				<style>
+					body {
+						font-family: Georgia,'Times New Roman', Times, serif;
+						margin: 20px  50px;
+						font-size: 0.7rem;
+		  
+						  }
+	
+					h1{
+						text-align: center;
+		   
+						  }
+					p{
+						margin:5px 70px;
+					   }
+	
+					.fila1{
+						padding:20px;
+						margin:0 auto;
+						margin-left:20px
+						 }
+	
+	
+						 .fila {
+							display: flex;
+							justify-content: space-between; 
+							align-items: center;
+						}
+						
+						.fila > div {
+							flex: 1; 
+							margin: 0 10px; 
+						}
+	
+					.fila2{
+						display:inline-block;
+						padding:20px;
+						margin-left:30px;
+	
+							}
+	
+					.text_fila{
+						margin-left:60px;
+							}
+	
+					table {
+						border-collapse: collapse;
+						width: 90%;
+						margin:0 auto;
+						border: 1px solid #dddddd;
+							}
+	
+					th, td {
+						border: 1px solid #dddddd;
+						text-align: left;
+						padding: 5px;
+							}
+	
+					th {
+						background-color: #f2f2f2;
+						font-size: 12px;
+						font-weight: bold;
+							}
+	
+					td {
+						font-size: 11px;
+							}
+	
+					.li_text{
+						list-style: none;
+						padding:10px;
+						margin 7px auto;
+	
+							}
+							.fila_areas {
+								column-count: 2; /* Establece dos columnas */
+								column-gap: 20px; /* Espacio entre las columnas */
+								margin-bottom: 80px; /* Espacio adicional al final */
+							}
+					
+						 
+					.equipo_text{
+						display: flex-box;
+						flex-wrap:no-wrap;
+						 justify-content: space-between;
+							}
+	
+							.page-break {
+								page-break-before: always;
+							}
+				</style>
+	
+	
+	
+		</head>
+		<body>
+			<div id="pageHeader" style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+			<img src="/Encabezado1.png" alt="" />
+			</div>
+			<div id="pageFooter" style="border-top: 1px solid #ddd; padding-top: 5px;">
+				<p style="color: #666; width: 70%; margin: 0; padding-bottom: 5px; text-align: let; font-family: sans-serif; font-size: .65em; float: left;"><p>Generado por: 
+				
+				</p></h4>
+				<p style="color: #666; margin: 0; padding-bottom: 5px; text-align: right; font-family: sans-serif; font-size: .65em">Página {{ page }} de {{ pages }}</h4>
+			</div>
+	
+			<h1> Reporte de Guia recibidad</h1>
+		   
+	
+	
+	<div class="fila">
+<div>
+    <h4>Guia #:</h4>
+    <p>${req.body.guia}</p>
+</div>
+
+</div>
+			
+			
+		
+	
+	
+			 <div >
+			<table>
+				<thead>
+					<tr>
+					<th>Referencia</th>
+						<th>Descripcion</th>
+						<th>Lote </th>
+						<th>caducidad</th>
+						<th>Cantidad </th>
+
+						<th>recibida</th>
+						<th>comentario </th>
+					</tr>
+				</thead>
+				<tbody>
+				${req.body.productos
+					.map((key) => {
+						return createTableRow(
+							key.referencia,
+							key.descripcion,
+							key.lote,
+							key.caducidad,
+							key.cantidad,
+							key.cantidad_recibida,
+							key.comentario
+						);
+					})
+					.join("")}
+			</tbody>
+			</table>
+			</div>
+			
+			
+		</body>
+	</html>
+	 `;
+
+	const opcionesPDF = {
+		format: "Letter",
+		orientation: "portrait",
+		border: {
+			top: "1px", // default is 0, units: mm, cm, in, px
+			right: "3px",
+			bottom: "2px",
+			left: "3px",
+		},
+	};
+
+	pdf.create(modeloPDF, opcionesPDF).toBuffer( (err, buffer) =>{
+		attachments.push({
+            
+            filename: "reporte.pdf",
+            content: buffer,
+		});
+	
+		let transporter;
+		transporter = nodemailer.createTransport({
+			host: "smtp.office365.com",
+			port: 587,
+			secure: false,
+			requireTLS: true,
+
+			auth: {
+				user: "christian.solano@distprolab.com",
+				pass: "D1stprol@2021",
+			},
+		});
+
+
+		
+		let mail_options = {
+			from: '"SISTEMAS" <christian.solano@distprolab.com>',
+			to: ['christian.solano@distprolab.com','steeven.polo@distprolab.com'],
+
+			subject: `Recepcion de Bodega`,
+			attachments:attachments
+				
+			};
+
+			transporter.sendMail(mail_options, (error, info) => {
+				if (error) {
+					console.log(error);
+				} else {
+					 console.log("Correo se envió con éxito: " + info.response);
+					/* res.status(201).json({
+						ok: true,
+						msg: `Se ha enviado con exito}`,
+					}); */
+				}
+			});
+
+
+
+	})
 	res.status(201).json({
 		msg: "El Stock a sido registrado con exito",
 	});

@@ -4,7 +4,7 @@ const Roles = require("../models/role");
 const { Op, where } = require("sequelize");
 const Contrato = require("../models/contrato");
 
-const consultacontrato = async (req, res) => {
+const consultaCotizacion = async (req, res) => {
 	const contrato = await Contrato.findAll({
 	
 	});
@@ -12,11 +12,11 @@ const consultacontrato = async (req, res) => {
 	res.json({ ok: true, contrato });
 };
 
-const GetIDcontrato = async (req, res) => {
+const GetIDCotizacion = async (req, res) => {
 	res.json({ usuarios });
 };
 
-const postcontrato = async (req, res) => {
+const postCotizacion = async (req, res) => {
 	const { NOMBRE } = req.body;
 
 	const contratos = new Contrato({ NOMBRE });
@@ -38,11 +38,11 @@ const postcontrato = async (req, res) => {
 	res.status(201).json({ msg: "El contrato  a sido registrado con exito" });
 };
 
-const contratoUpdate = async (req, res) => {
+const UpdateCotizacion = async (req, res) => {
 	res.send("update guardada con exito..");
 };
 
-const contratoDelete = async (req, res) => {
+const DeleteCotizacion = async (req, res) => {
 	const id = req.params.id;
 	const { NOMBRE } = req.body;
 	const contrato = await Contrato.findByPk(id);
@@ -61,9 +61,9 @@ const contratoDelete = async (req, res) => {
 };
 
 module.exports = {
-	contratoDelete,
-	contratoUpdate,
-	consultacontrato,
-	postcontrato,
-	GetIDcontrato,
+	DeleteCotizacion,
+	UpdateCotizacion,
+	consultaCotizacion,
+	postCotizacion,
+	GetIDCotizacion,
 };
