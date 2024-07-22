@@ -8,7 +8,7 @@ const { getPedidoStock, getAllPedidoStock, getFiltroPedidoStock, updatePedidoSto
 const router = Router();
 router.get("/",[validarJWT, tieneRole], getPedidoStock);
 router.get("/filtros/:id",[validarJWT, tieneRole],getAllPedidoStock)
-router.get("/reporte-pdf/:id",[validarJWT, tieneRole],getReportePdfPedidoStock)
+router.get("/reporte-pdf/:id",getReportePdfPedidoStock)
 router.get("/:id", [validarJWT, tieneRole],getFiltroPedidoStock);
 router.put("/:id", [validarJWT, tieneRole],updatePedidoStock);
 router.post("/",[validarJWT, tieneRole],createPedidoStock);

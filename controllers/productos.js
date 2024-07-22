@@ -4,12 +4,28 @@ const fs = require("fs");
 const csvToJson = require("convert-csv-to-json");
 const Producto = require("../models/productos");
 const { forIn } = require("lodash");
-const { Op } = require("sequelize");
+const { Op, Model, Sequelize } = require("sequelize");
+
+const ItemStock = require("../models/itemStock");
 const getProductos = async (req, res) => {
 	const productos = await Producto.findAll({
 		where: {
 			ESTADO: 1,
 		},
+		include:[{
+		model: ItemStock,
+		as:'stockItem',
+		attributes: [
+			
+			"referencia",
+			
+			"lote",
+			[Sequelize.fn("SUM", Sequelize.col("cantidad_recibida")), "TOTAL"],
+		],
+
+		group: ["referencia", "lote", ],
+	}
+]
 	});
 	res.status(200).json({
 		ok: true,

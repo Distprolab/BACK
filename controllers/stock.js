@@ -20,15 +20,14 @@ const getStock = async (req, res) => {
 			"referencia",
 			"caducidad",
 			"lote",
-			[Sequelize.fn("SUM", Sequelize.col("cantidad")), "TOTAL"],
+			[Sequelize.fn("SUM", Sequelize.col("cantidad_recibida")), "TOTAL"],
 		],
 
 		group: ["referencia", "lote", "productId", "caducidad"],
 	});
 
-	// const allStock = await ItemStock.findAll({});
 	const allStock = all.reduce((acc, item) => {
-		//hhconsole.log(`ITEM`, item.product);
+	
 		const referencia = item.referencia;
 		const nombre = item.product.NOMBRE;
 		if (!acc[referencia]) {
@@ -130,7 +129,7 @@ const getAllStock = async (req, res) => {
 };
 const getBusquedaStock = async (req, res) => {
 	const { termino } = req.params;
-
+	console.log(termino);
 	const dataCA = termino.replace(/\w\S*/g, function (e) {
 		return e.charAt(0).toUpperCase() + e.substring(1);
 	});
@@ -140,9 +139,43 @@ const getBusquedaStock = async (req, res) => {
 				[Op.like]: `%${dataCA}%`,
 			},
 		},
-	});
+		include: {
+			model: Producto,
+			as: "product",
+		},
+		attributes: [
+			"productId",
+			"referencia",
+			"caducidad",
+			"lote",
+			[Sequelize.fn("SUM", Sequelize.col("cantidad_recibida")), "TOTAL"],
+		],
 
-	res.status(200).json({ ok: true, resultados: busquedaStock });
+		group: ["referencia", "lote", "productId", "caducidad"],
+	},
+);
+const allStock = busquedaStock.reduce((acc, item) => {
+	
+	const referencia = item.referencia;
+	const nombre = item.product.NOMBRE;
+	if (!acc[referencia]) {
+		acc[referencia] = {
+			referencia: referencia,
+			nombre: nombre,
+			detalles: [],
+			total_referencia: 0,
+		};
+	}
+	acc[referencia].detalles.push({
+		lote: item.lote,
+		TOTAL: item.get("TOTAL"),
+		caducidad: item.caducidad,
+	});
+	acc[referencia].total_referencia += Number(item.get("TOTAL"));
+	return acc;
+}, {});
+const finalResults = Object.values(allStock);
+	res.status(200).json({ ok: true, resultados: finalResults });
 };
 const getFiltroStock = async (req, res) => {
 	const { id } = req.params;
@@ -169,14 +202,14 @@ const getFiltroStock = async (req, res) => {
 const createStock = async (req, res) => {
 	const idUser = req.usuario;
 	const { guia, productos } = req.body;
-	//console.log(productos);
-	const maillist = await Correo.findAll({})
-	console.log(`maillist`,maillist)
-	const validadGuia = await Stock.findOne({ where: { guia: guia } });
-    const attachments=[];
-	//console.log(`validarGuia`, validadGuia);
 
-/* 	if (validadGuia) {
+	const maillist = await Correo.findAll({});
+	const correos = maillist.map((mail) => mail.correo).join(",");
+	console.log(`maillist`, correos);
+	const validadGuia = await Stock.findOne({ where: { guia: guia } });
+	const attachments = [];
+
+	if (validadGuia) {
 		return res
 			.status(400)
 			.json({ ok: true, msg: `La guia ${guia} ya fue ingresada` });
@@ -198,7 +231,7 @@ const createStock = async (req, res) => {
 					where: { referencia: producto.referencia },
 				});
 				const productoId = producto.id;
-				console.log(`kooko`, Idproducto);
+				//console.log(`kooko`, Idproducto);
 				return await ItemStock.create(
 					{
 						referencia: producto.referencia,
@@ -210,6 +243,7 @@ const createStock = async (req, res) => {
 						sanitario: producto.sanitario,
 						comentario: producto.comentario,
 						productoId: Idproducto.id,
+						productId: Idproducto.id,
 					},
 					{ transaction: t }
 				);
@@ -217,7 +251,7 @@ const createStock = async (req, res) => {
 		);
 
 		await stocks.setStockItem(itemStocks, { transaction: t });
-	});  */
+	});
 
 	function createTableRow(
 		referencia,
@@ -416,13 +450,12 @@ const createStock = async (req, res) => {
 		},
 	};
 
-	pdf.create(modeloPDF, opcionesPDF).toBuffer( (err, buffer) =>{
+	pdf.create(modeloPDF, opcionesPDF).toBuffer((err, buffer) => {
 		attachments.push({
-            
-            filename: "reporte.pdf",
-            content: buffer,
+			filename: "reporte.pdf",
+			content: buffer,
 		});
-	
+
 		let transporter;
 		transporter = nodemailer.createTransport({
 			host: "smtp.office365.com",
@@ -436,32 +469,26 @@ const createStock = async (req, res) => {
 			},
 		});
 
-
-		
 		let mail_options = {
 			from: '"SISTEMAS" <christian.solano@distprolab.com>',
-			to: ['christian.solano@distprolab.com','steeven.polo@distprolab.com'],
+			to: [correos],
 
 			subject: `Recepcion de Bodega`,
-			attachments:attachments
-				
-			};
+			attachments: attachments,
+		};
 
-			transporter.sendMail(mail_options, (error, info) => {
-				if (error) {
-					console.log(error);
-				} else {
-					 console.log("Correo se envió con éxito: " + info.response);
-					/* res.status(201).json({
+		transporter.sendMail(mail_options, (error, info) => {
+			if (error) {
+				console.log(error);
+			} else {
+				console.log("Correo se envió con éxito: " + info.response);
+				/* res.status(201).json({
 						ok: true,
 						msg: `Se ha enviado con exito}`,
 					}); */
-				}
-			});
-
-
-
-	})
+			}
+		});
+	});
 	res.status(201).json({
 		msg: "El Stock a sido registrado con exito",
 	});

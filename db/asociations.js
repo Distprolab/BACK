@@ -103,6 +103,7 @@ Detalle.belongsTo(Cabecera, { as: "pacientes" });
 
 Stock.hasMany(ItemStock, { as: "stockItem", foreignKey: "stockId" });
 ItemStock.belongsTo(Stock, { as: "inventario" });
+
 Producto.hasMany(ItemStock, { as: "stockItem", foreignKey: "productoId" });
 ItemStock.belongsTo(Producto, { as: "product" });
 

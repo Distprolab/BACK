@@ -53,6 +53,7 @@ const getAllPedidoStock = async (req, res) => {
 
 	const cantidadReservadaDetalle = [];
 	const promises = jsonPrueba.itemstock.map(async (item) => {
+		
 		const referencia = item.product.REFERENCIA;
 		const cantidad = item.CANTIDAD;
 
@@ -66,14 +67,14 @@ const getAllPedidoStock = async (req, res) => {
 				"productoId",
 			],
 			group: ["referencia", "lote", "caducidad", "productoId"],
-			include: [
+			/* include: [
 				{
 					model: Producto,
 					as: "product",
 				},
-			],
+			], */
 		});
-
+		console.log(`---->`, stokDisponiblePromises)
 		const stockDisponible = await stokDisponiblePromises;
 		stockDisponible.sort(
 			(a, b) => new Date(a.caducidad) - new Date(b.caducidad)
@@ -244,8 +245,8 @@ const updatePedidoStock = async (req, res) => {
 					console.log(`lote`, lote);
 					const cantidadEntregada = cantidadesEntregadas[i];
 					console.log(`cant`, cantidadEntregada);
-					ItemStock.decrement("CANTIDAD", {
-						by: CANTIDAD,
+					ItemStock.decrement("CANTIDAD_RECIBIDA", {
+						by: ENTREGADO,
 						where: {
 							productoId: ID_PRODUCTO,
 							lote: lote,
@@ -312,8 +313,8 @@ const updatePedidoStock = async (req, res) => {
 
 const deletePedidoStock = async (req, res) => {
 	const { id } = req.params;
-
-	await sequelize.transaction(async (t) => {
+console.log(id)
+	
 		const idPedido = await PedidoStock.findByPk(
 			id /* {
 			include: ["items"],
@@ -331,7 +332,7 @@ const deletePedidoStock = async (req, res) => {
 			{
 				ESTADO: 0,
 			},
-			{ where: { id: id }, transaction: t }
+			{ where: { id: id }}
 		);
 
 		/* 	await Promise.all(
@@ -350,7 +351,7 @@ const deletePedidoStock = async (req, res) => {
 				);
 			})
 		); */
-	});
+
 
 	res.status(200).json({
 		msg: "El pedido a sido desactivado con exito...",
@@ -359,8 +360,8 @@ const deletePedidoStock = async (req, res) => {
 const getReportePdfPedidoStock = async (req, res) => {
 	const { id } = req.params;
 
-	const pedido = await PedidoStock.findOne({
-		where: { id: id },
+	const pedido = await PedidoStock.findByPk(id,{
+	
 		include: {
 			model: Itempedidostock,
 			as: "itemstock",
@@ -370,7 +371,7 @@ const getReportePdfPedidoStock = async (req, res) => {
 			},
 		},
 	});
-	console.log(pedido.product);
+	console.log(`----->`,pedido);
 	if (!pedido) {
 		return res.status(400).json({ msg: "No existe orden creada" });
 	}
@@ -521,7 +522,7 @@ const getReportePdfPedidoStock = async (req, res) => {
 									<td>${key.product.NOMBRE}</td>
 									<td>${key.CANTIDAD}</td>
 									<td>${key.ENTREGADO}</td>
-									<td>${key.LOTE}</td>
+									<td>${key.lote}</td>
 								</tr>
 								
 							`
@@ -559,7 +560,7 @@ const getReportePdfPedidoStock = async (req, res) => {
 		stream.pipe(res);
 	});
 
-	//res.json({ok:true, idProceso})
+	//res.json({ok:true, pedido})
 };
 module.exports = {
 	getReportePdfPedidoStock,
