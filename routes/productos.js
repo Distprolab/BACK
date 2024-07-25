@@ -7,6 +7,9 @@ const {
 	getByProductos,
 	createProductos,
 	deleteProductos,
+	postProductos,
+	getByIdProductos,
+	updateProductos,
 } = require("../controllers/productos");
 const multer = require("multer");
 
@@ -21,6 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const router = Router();
 router.get("/", [validarJWT, tieneRole],getProductos);
+router.get("/producto/:id", [validarJWT, tieneRole],getByIdProductos);
 router.get("/:q", [validarJWT, tieneRole], getByProductos);
 router.post(
 	"/",
@@ -29,6 +33,32 @@ router.post(
 	tieneRole,
 
 	createProductos
+);
+router.post(
+	"/producto",
+	
+	validarJWT,
+	tieneRole,
+
+	postProductos
+);
+/* router.post(
+	"/productos/producto/",
+	
+	validarJWT,
+	tieneRole,
+
+	postProductos
+); */
+
+
+router.put(
+	"/:id",
+	
+	validarJWT,
+	tieneRole,
+
+	updateProductos
 );
 router.delete("/:id", [validarJWT, tieneRole], deleteProductos);
 

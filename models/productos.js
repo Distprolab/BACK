@@ -17,6 +17,7 @@ Producto.init(
 		},
 		UNIDAD: { type: DataTypes.STRING },
 		GENERACION: { type: DataTypes.STRING },
+		VALOR: { type: DataTypes.DOUBLE },
 		ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
 	},
 	{

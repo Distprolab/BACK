@@ -5,7 +5,7 @@ class Cotizacion extends Model {}
 
 Cotizacion.init(
 	{
-		RAZONSOCIAL: DataTypes.STRING,
+		razi: DataTypes.STRING,
 		RUC: DataTypes.STRING,
 		CORREO: DataTypes.INTEGER,
 		MODALIDAD: DataTypes.INTEGER,

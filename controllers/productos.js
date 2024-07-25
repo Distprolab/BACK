@@ -4,14 +4,14 @@ const fs = require("fs");
 const csvToJson = require("convert-csv-to-json");
 const Producto = require("../models/productos");
 const { forIn } = require("lodash");
-const { Op, Model, Sequelize } = require("sequelize");
+const { Op, Model, Sequelize, where } = require("sequelize");
 
 const ItemStock = require("../models/itemStock");
 const getProductos = async (req, res) => {
 	const productos = await Producto.findAll({
 		where: {
 			ESTADO: 1,
-		},
+		} /* ,
 		include:[{
 		model: ItemStock,
 		as:'stockItem',
@@ -25,7 +25,7 @@ const getProductos = async (req, res) => {
 
 		group: ["referencia", "lote", ],
 	}
-]
+] */,
 	});
 	res.status(200).json({
 		ok: true,
@@ -38,23 +38,29 @@ const getByProductos = async (req, res) => {
 	const dataCA = q.replace(/\w\S*/g, function (e) {
 		return e.charAt(0).toUpperCase() + e.substring(1);
 	});
-	const productos = await Producto.findAll(
-		{
-
-			where:{
-				NOMBRE:{
-					[Op.like]: `${dataCA}%`
-				}
-			}
-		}
-
-
-
-	);
+	const productos = await Producto.findAll({
+		where: {
+			NOMBRE: {
+				[Op.like]: `${dataCA}%`,
+			},
+		},
+	});
 	res.status(200).json({
 		ok: true,
 		productos: productos,
 	});
+};
+
+const getByIdProductos = async (req, res) => {
+	const { id } = req.params;
+
+	const producto = await Producto.findByPk(id);
+
+	if (!producto) {
+		res.status(400).json({ ok: true, msg: `No existe id ${id}` });
+	}
+
+	res.status(200).json({ ok: true, productos: producto });
 };
 
 const createProductos = async (req, res) => {
@@ -107,9 +113,49 @@ const createProductos = async (req, res) => {
 		});
 	}
 };
+const postProductos = async (req, res) => {
+	const { REFERENCIA, NOMBRE, CATEGORIA, UNIDAD, GENERACION, VALOR } = req.body;
 
+	const productos = new Producto({
+		REFERENCIA,
+		NOMBRE,
+		CATEGORIA,
+		UNIDAD,
+		GENERACION,
+		VALOR}
+	);
+	const productoDB = await Producto.findOne({
+		where: { REFERENCIA: productos.REFERENCIA },
+	});
+
+	if (productoDB) {
+		return res.status(400).json({ok:true, msg:`El producto ${REFERENCIA} ya existe`})
+	}
+	await productos.save();
+
+	res.status(201).json({ ok: true, msg: `Se guardo con el exito producto ${NOMBRE}` });
+};
 const updateProductos = async (req, res) => {
-	res.send("update guardada con exito..");
+	const { id } = req.params;
+	const { REFERENCIA, NOMBRE, CATEGORIA, UNIDAD, GENERACION, VALOR } = req.body;
+	const producto = await Producto.findByPk(id);
+
+	if (!producto) {
+		res.status(400).json({ ok: true, msg: `No existe ID ${id}` });
+	}
+
+	await producto.update({
+		REFERENCIA,
+		NOMBRE,
+		CATEGORIA,
+		UNIDAD,
+		GENERACION,
+		VALOR,
+	});
+
+	res
+		.status(200)
+		.json({ ok: true, msg: `Se actualizo con exito el producto ${NOMBRE}` });
 };
 
 const deleteProductos = async (req, res) => {
@@ -132,7 +178,9 @@ const deleteProductos = async (req, res) => {
 module.exports = {
 	getProductos,
 	getByProductos,
+	getByIdProductos,
 	createProductos,
+	postProductos,
 	updateProductos,
 	deleteProductos,
 };

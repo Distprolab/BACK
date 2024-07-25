@@ -1,12 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-//const { infinity } = require('../controllers/infinity');
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const db = require("../db/connection");
-const { Sequelize } = require("sequelize");
+const Sequelize  = require("sequelize");
 var xmlparser = require("express-xml-bodyparser");
-const { sequelize } = require("./cabecera");
 const socketIO = require("socket.io");
 const http = require("http");
 const { desconectar, mensaje } = require("../sockets/sockets");
@@ -140,7 +138,7 @@ class Server {
 	async dbConnection() {
 		try {
 			await db.authenticate();
-			sequelize.sync({ force: false }).then(() => {
+			 db.sync({ force: false }).then(() => {
 				console.log("Database online");
 			});
 		} catch (error) {
@@ -233,31 +231,16 @@ class Server {
 			this.paths.estadofinanciero,
 			require("../routes/estadofinanciero")
 		);
-		this.app.use(
-			this.paths.tipocontrato,
-			require("../routes/tipocontrato")
-		);
-		this.app.use(
-			this.paths.estadoproceso,
-			require("../routes/estadoproceso")
-		);
-		this.app.use(
-			this.paths.analizador,
-			require("../routes/analizador")
-		);
+		this.app.use(this.paths.tipocontrato, require("../routes/tipocontrato"));
+		this.app.use(this.paths.estadoproceso, require("../routes/estadoproceso"));
+		this.app.use(this.paths.analizador, require("../routes/analizador"));
 		this.app.use(
 			this.paths.accesoriocotizacion,
 			require("../routes/accesoriocotizacion")
 		);
-		this.app.use(
-			this.paths.cotizacion,
-			require("../routes/cotizacion")
-		);
+		this.app.use(this.paths.cotizacion, require("../routes/cotizacion"));
 
-		this.app.use(
-			this.paths.correos,
-			require("../routes/correos")
-		);
+		this.app.use(this.paths.correos, require("../routes/correos"));
 	}
 
 	listen() {
