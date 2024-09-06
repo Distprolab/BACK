@@ -7,6 +7,10 @@ Detalle_Agen.init(
     ItemID: DataTypes.INTEGER,
     ItemName: DataTypes.STRING,
     ExamID: DataTypes.STRING,
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
   },
   {

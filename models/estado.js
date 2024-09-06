@@ -9,16 +9,19 @@ Estado.init(
     NOMBRE: {
       type: DataTypes.STRING,
     },
-    
+    color:DataTypes.STRING,
 
+   // USUARIO_ID: DataTypes.INTEGER,
     USUARIO_ID: DataTypes.INTEGER,
-   
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
 
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
   },
   {
     sequelize,
-    modelName: "estado",
+    modelName: "estados",
   },
 );
 module.exports = Estado;

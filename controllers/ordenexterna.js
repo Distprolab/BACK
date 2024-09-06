@@ -346,17 +346,17 @@ const ordenexternaPost = async (req, res) => {
 			`ORD_${DLNUOR}_${fecha}${horaToma2}.TXT`
 		);
 		const pruebas = req.body.DLCEXAS.filter((pru) => pru.ESTADO === true)
-			.map((pru, i) => `OBR|${i + 1}|${pru.ItemID}|`)
+		.map((pru, i) => `OBR|${i + 1}|||${pru.ItemID}`)
 			.join("\n");
 		console.log(pruebas);
 
 		let HL7 =
-			`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|202208220725232916258\n` +
+			`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|${fecha}${horaToma2}\n` +
 			`PID|1|${req.body.DLCEDU}|846641|846641|${
 				req.body.DLAPEL
 			}^.||${req.body.DLFECN.replaceAll("-", "")}|${req.body.DLSEXO}||\n` +
 			`PV1||1|^^|ROCHE^ROCHE|1^IESS PORTOVIEJO(LABORATORIO)|ZBR3^RECEPCION2|${req.body.DLCACT}|${req.body.DLCDEP}|${req.body.DLCOTR}|||||||||2208226258|${req.body.DLHIST}\n` +
-			`ORC|NW||||||||${fecha}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
+			`ORC|NW||||||||${fecha}${horaToma2}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
 			`${pruebas}`;
 
 		fs.writeFileSync(`${filename}`, HL7);
@@ -441,17 +441,17 @@ const ordenexternaUpdate = async (req, res) => {
 					`ORD_${DLNUOR}_${fecha}${horaToma2}.TXT`
 				);
 				const pruebas = req.body.DLCEXAS.filter((pru) => pru.ESTADO === true)
-					.map((pru, i) => `OBR|${i + 1}|${pru.ItemID}|`)
+					.map((pru, i) => `OBR|${i + 1}|||${pru.ItemID}`)
 					.join("\n");
 				console.log(pruebas);
 
 				let HL7 =
-					`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|202208220725232916258\n` +
-					`PID|1|${req.body.DLCEDU}|846641|846641|${
+					`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|${fecha}${horaToma2}\n` +
+					`PID|1|${req.body.DLCEDU}|${req.body.DLHIST}|${req.body.DLHIST}|${
 						req.body.DLAPEL
 					}^.||${req.body.DLFECN.replaceAll("-", "")}|${req.body.DLSEXO}||\n` +
 					`PV1||1|^^|ROCHE^ROCHE|1^IESS PORTOVIEJO(LABORATORIO)|ZBR3^RECEPCION2|${req.body.DLCACT}|${req.body.DLCDEP}|${req.body.DLCOTR}|||||||||2208226258|${req.body.DLHIST}\n` +
-					`ORC|NW||||||||${fecha}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
+					`ORC|NW||||||||${fecha}${horaToma2}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
 					`${pruebas}`;
 
 				fs.writeFileSync(`${filename}`, HL7);
@@ -525,17 +525,17 @@ const ordenexternaUpdate = async (req, res) => {
 					`ORD_${DLNUOR}_${fecha}${horaToma2}.TXT`
 				);
 				const pruebas = req.body.DLCEXAS.filter((pru) => pru.ESTADO === true)
-					.map((pru, i) => `OBR|${i + 1}|${pru.ItemID}|`)
+					.map((pru, i) => `OBR|${i + 1}|||${pru.ItemID}`)
 					.join("\n");
 				console.log(pruebas);
 
 				let HL7 =
-					`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|202208220725232916258\n` +
-					`PID|1|${req.body.DLCEDU}|846641|846641|${
+					`MSH|^~\&||IESS PORTOVIEJO|cobas Infinity|Roche Ecuador|${fecha}${horaToma2}||OML^O21^OML_O21|${fecha}${horaToma2}\n` +
+					`PID|1|${req.body.DLCEDU}|${req.body.DLHIST}|${req.body.DLHIST}|${
 						req.body.DLAPEL
 					}^.||${req.body.DLFECN.replaceAll("-", "")}|${req.body.DLSEXO}||\n` +
 					`PV1||1|^^|ROCHE^ROCHE|1^IESS PORTOVIEJO(LABORATORIO)|ZBR3^RECEPCION2|${req.body.DLCACT}|${req.body.DLCDEP}|${req.body.DLCOTR}|||||||||2208226258|${req.body.DLHIST}\n` +
-					`ORC|NW||||||||${fecha}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
+					`ORC|NW||||||||${fecha}${horaToma2}|||${req.body.DLCMED}|${req.body.DLCPRO}|||${req.body.DLTIDO}|${req.body.DLCSER}\n` +
 					`${pruebas}`;
 
 				fs.writeFileSync(`${filename}`, HL7);

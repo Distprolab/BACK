@@ -9,6 +9,7 @@ const Producto = require("../models/productos");
 const Correo = require("../models/correos");
 const nodemailer = require("nodemailer");
 const pdf = require("html-pdf");
+const Bodega = require("../models/bodega");
 const getStock = async (req, res) => {
 	const all = await ItemStock.findAll({
 		include: {
@@ -27,7 +28,6 @@ const getStock = async (req, res) => {
 	});
 
 	const allStock = all.reduce((acc, item) => {
-	
 		const referencia = item.referencia;
 		const nombre = item.product.NOMBRE;
 		if (!acc[referencia]) {
@@ -139,22 +139,29 @@ const getBusquedaStock = async (req, res) => {
 				[Op.like]: `%${dataCA}%`,
 			},
 		},
-		include: {
-			model: Producto,
-			as: "product",
-		},
+		include: [
+			{
+				model: Producto,
+				as: "product",
+			},
+			{
+				model: Bodega,
+				as: "bodega",
+			},
+		],
+
 		attributes: [
 			"productId",
 			"referencia",
+			"bodegaId",
 			"caducidad",
 			"lote",
 			[Sequelize.fn("SUM", Sequelize.col("cantidad_recibida")), "TOTAL"],
 		],
 
-		group: ["referencia", "lote", "productId", "caducidad"],
-	},
-);
-const allStock = busquedaStock.reduce((acc, item) => {
+		group: ["referencia", "bodegaId", "lote", "productId", "caducidad"],
+	}) 
+	const allStock = busquedaStock.reduce((acc, item) => {
 	
 	const referencia = item.referencia;
 	const nombre = item.product.NOMBRE;
@@ -168,13 +175,14 @@ const allStock = busquedaStock.reduce((acc, item) => {
 	}
 	acc[referencia].detalles.push({
 		lote: item.lote,
+		bodega:item.bodegaId,
 		TOTAL: item.get("TOTAL"),
 		caducidad: item.caducidad,
 	});
 	acc[referencia].total_referencia += Number(item.get("TOTAL"));
 	return acc;
 }, {});
-const finalResults = Object.values(allStock);
+const finalResults = Object.values(allStock); finalResults
 	res.status(200).json({ ok: true, resultados: finalResults });
 };
 const getFiltroStock = async (req, res) => {
@@ -201,9 +209,9 @@ const getFiltroStock = async (req, res) => {
 
 const createStock = async (req, res) => {
 	const idUser = req.usuario;
-	const { guia, productos } = req.body;
+	const { guia, bodegaId, proveedor, productos } = req.body;
 
-	const maillist = await Correo.findAll({});
+	const maillist = await Correo.findAll({ where: { empresa: proveedor } });
 	const correos = maillist.map((mail) => mail.correo).join(",");
 	console.log(`maillist`, correos);
 	const validadGuia = await Stock.findOne({ where: { guia: guia } });
@@ -238,12 +246,15 @@ const createStock = async (req, res) => {
 						lote: producto.lote,
 						caducidad: producto.caducidad,
 						cantidad: producto.cantidad,
-						cantidad_recibida: producto.cantidad_recibida,
+						//cantidad_recibida: producto.cantidad_recibida,
+						cantidad: producto.cantidad,
+						cantidad_recibida: producto.cantidad,
 						fabricante: producto.fabricante,
 						sanitario: producto.sanitario,
 						comentario: producto.comentario,
 						productoId: Idproducto.id,
 						productId: Idproducto.id,
+						bodegaId: bodegaId,
 					},
 					{ transaction: t }
 				);
@@ -252,7 +263,6 @@ const createStock = async (req, res) => {
 
 		await stocks.setStockItem(itemStocks, { transaction: t });
 	});
-
 	function createTableRow(
 		referencia,
 		descripcion,
@@ -489,6 +499,7 @@ const createStock = async (req, res) => {
 			}
 		});
 	});
+
 	res.status(201).json({
 		msg: "El Stock a sido registrado con exito",
 	});

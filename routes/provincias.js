@@ -1,4 +1,4 @@
-const { Router } = require("express");
+/* const { Router } = require("express");
 
 const { validarJWT } = require("../middleware/validar-jwt");
 const { esAdminRole, tieneRole } = require("../middleware/validar-roles");
@@ -9,4 +9,4 @@ const router = Router();
 router.get("/", [validarJWT, tieneRole], getProvincia);
 router.post("/", [validarJWT, tieneRole], postProvincia);
 
-module.exports = router;
+module.exports = router; */

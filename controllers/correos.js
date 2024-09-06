@@ -1,25 +1,22 @@
 const { Request, Response } = require("express");
 
-
 const { Op } = require("sequelize");
 const Correo = require("../models/correos");
 
 const consultacorreo = async (req, res) => {
-	
-		const correo = await Correo.findAll();
+	const correo = await Correo.findAll();
 
 	res.json({ ok: true, correo });
-	}
-	
+};
 
 const correoGetID = async (req, res) => {
 	res.json({ usuarios });
 };
 
 const createcorreo = async (req, res) => {
-	const { nombres, apellidos, correo } = req.body;
+	const { nombres, apellidos, correo ,empresa} = req.body;
 
-	const correos = new Correo({  nombres, apellidos, correo });
+	const correos = new Correo({ nombres, apellidos, correo,empresa });
 	const coreo = await Correo.findOne({
 		where: {
 			correo: correos.correo,
@@ -48,5 +45,11 @@ const correoDelete = async (req, res) => {
 	});
 };
 
-module.exports = { createcorreo, consultacorreo,
-     correoUpdate,correoGetID,correoUpdate ,correoDelete};
+module.exports = {
+	createcorreo,
+	consultacorreo,
+	correoUpdate,
+	correoGetID,
+	correoUpdate,
+	correoDelete,
+};

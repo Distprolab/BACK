@@ -10,6 +10,10 @@ Solicitud_Proceso.init(
     MODALIDAD_ID: DataTypes.INTEGER,
     FECHAENTREGA: DataTypes.DATE,
     OBSERVACIONES: DataTypes.STRING,
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
   },
   {

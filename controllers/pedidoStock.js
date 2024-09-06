@@ -29,11 +29,11 @@ const getPedidoStock = async (req, res) => {
 				model: Itempedidostock,
 				as: "itemstock",
 				attributes: ["ID_PRODUCTO", "CANTIDAD"],
-				/* 	include: [{ model: Producto, as: "product", attributes: ["NOMBRE"] }], */
+				 	include: [{ model: Producto, as: "product", attributes: ["NOMBRE"] }], 
 			},
 			{
 				model: Usuario,
-				as: "user",
+				as: "usuario",
 				attributes: ["doctor"],
 			},
 		],

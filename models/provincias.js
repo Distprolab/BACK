@@ -9,6 +9,10 @@ const Provincia = db.define(
       type: DataTypes.STRING,
       //required:[true,'El rol es obligatorio']
     },
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
   },
   {
     freezeTableName: true,

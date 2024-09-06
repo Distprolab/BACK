@@ -5,7 +5,12 @@ class Tipocontrato extends Model {}
 Tipocontrato.init(
 	{
 		NOMBRE: DataTypes.STRING,
+		USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
 	},
+	
 	{
 		sequelize,
 		modelName: "tipocontrato",

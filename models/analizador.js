@@ -6,9 +6,13 @@ class Analizador extends Model {}
 Analizador.init(
 	{
 		NOMBRE: { type: DataTypes.STRING },
-		
-    
-		ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },		
+
+		CARACTERISTICA: { type: DataTypes.TEXT("long") },
+		USUARIO_ID: DataTypes.INTEGER,
+		CREATEDBY: DataTypes.INTEGER,
+		UPDATEDBY: DataTypes.INTEGER,
+		DELETEDBY: DataTypes.INTEGER,
+		ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
 	},
 	{
 		sequelize,

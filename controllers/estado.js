@@ -4,27 +4,60 @@ const Roles = require("../models/role");
 const { Op, where } = require("sequelize");
 const estado = require("../models/estado");
 const Estado = require("../models/estado");
+const Usuario = require("../models/usuarios");
 
 const consultaestado = async (req, res) => {
 	const estado = await Estado.findAll({
-		/* where: {
-				rol: {
-					[Op.ne]: "ADMIN",
-				},
-			}, */
+		include:{
+			model: Usuario,
+			as:"usuario"
+		}
 	});
 
 	res.json({ ok: true, estado });
 };
 
 const GetIDestado = async (req, res) => {
-	res.json({ usuarios });
+	const { id } = req.params;
+	const estadoId = await Estado.findByPk(id);
+
+	if (!estadoId) {
+		return res.status(400).json({
+			ok: false,
+			msg: `El id ${id} no existe`,
+		});
+	}
+	res.status(200).json({
+		ok: true,
+		estadoId,
+	});
 };
+const GetfiltroEstado = async (req, res) => {
+	const { busquedaestado } = req.params;
 
+	const dataCA = busquedaestado.replace(/\w\S*/g, function (e) {
+		return e.charAt(0).toUpperCase() + e.substring(1);
+	});
+
+	const estado = await Estado.findAll({
+		where: {
+			NOMBRE: {
+				[Op.like]: `%${dataCA}%`,
+			},
+		},
+	});
+
+	res.status(200).json({ ok: true, estado });
+};
 const postestado = async (req, res) => {
-	const { NOMBRE } = req.body;
-
-	const estados = new Estado({ NOMBRE });
+	const { NOMBRE, color } = req.body;
+	const user = req.usuario;
+	const estados = new Estado({
+		NOMBRE,
+		color,
+		CREATEDBY: user.id,
+		usuarioId: user.id,
+	});
 	const estado = await Estado.findOne({
 		where: {
 			NOMBRE: NOMBRE,
@@ -44,7 +77,26 @@ const postestado = async (req, res) => {
 };
 
 const estadoUpdate = async (req, res) => {
-	res.send("update guardada con exito..");
+	const id = req.body.id;
+
+	const estado = await Estado.findByPk(id);
+	if (!estado) {
+		return res.status(404).json({ ok: true, msg: "no existe estado" });
+	}
+
+	const { NOMBRE, color } = req.body;
+
+	await estado.update(
+		{
+			NOMBRE,
+			color,
+		},
+		{ where: { id: id } }
+	);
+
+	res
+		.status(200)
+		.json({ ok: true, msg: `Se actualizo con exito el ${NOMBRE}` });
 };
 
 const estadoDelete = async (req, res) => {
@@ -57,17 +109,18 @@ const estadoDelete = async (req, res) => {
 		});
 	}
 	await estado.update({
-		ESTADO:0 }
-	);
+		ESTADO: 0,
+	});
 
 	res.status(200).json({
-		msg: `El nombre ${NOMBRE} a sido desactivado con exito...`,
+		msg: `El  ${estado.dataValues.NOMBRE} a sido desactivado con exito...`,
 	});
 };
 
 module.exports = {
 	estadoDelete,
 	estadoUpdate,
+	GetfiltroEstado,
 	consultaestado,
 	postestado,
 	GetIDestado,

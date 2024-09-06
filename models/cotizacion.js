@@ -5,18 +5,22 @@ class Cotizacion extends Model {}
 
 Cotizacion.init(
 	{
-		razi: DataTypes.STRING,
+		RAZONSOCIAL: DataTypes.STRING,
 		RUC: DataTypes.STRING,
-		CORREO: DataTypes.INTEGER,
-		MODALIDAD: DataTypes.INTEGER,
+		CORREO: DataTypes.STRING,
+		//MODALIDAD: DataTypes.INTEGER,
         ESTADISTICA:DataTypes.BOOLEAN,
-        CARGA:DataTypes.BLOB,
-        COMENTARIOS:DataTypes.STRING
-
+        CARGA:DataTypes.STRING,
+        COMENTARIOS:DataTypes.STRING,
+		USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
+		ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
 	},
 	{
 		sequelize,
-		modelName: "cotizacion",
+		modelName: "cotizacions",
 	}
 );
 module.exports = Cotizacion;

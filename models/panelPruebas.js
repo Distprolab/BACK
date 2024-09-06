@@ -14,7 +14,19 @@ Panel_pruebas.init(
     CATEGORIA: {
       type: DataTypes.STRING,
     },
+
+    TIEMPO: {
+      type: DataTypes.INTEGER,
+    },
+    VALOR: {
+      type: DataTypes.FLOAT,
+    },
+    favorite:DataTypes.BOOLEAN,
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
   },
   {
     sequelize,

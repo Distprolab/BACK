@@ -8,6 +8,7 @@ const {
 	UpdateCotizacion,
 	postCotizacion,
 	consultaCotizacion,
+	ReporteCotizacion,
 } = require("../controllers/cotizacion");
 const { check } = require("express-validator");
 const { isEmpty, max } = require("lodash");
@@ -31,7 +32,7 @@ router.post(
 	"/",upload.single("file"),
 	validarJWT,
 	esAdminRole,
-	[
+	/* [
 		check("RAZONSOCIAL", "La razon social es obligatorio").not().isEmpty(),
 		validarCampos,
 	],
@@ -48,10 +49,11 @@ router.post(
 	[
 		check("EQUIPO_ID", "El equipo  es obligatorio").not().isEmpty(),
 		validarCampos,
-	],
+	], */
 
 	postCotizacion
 );
+router.get("/reporte/:reporte",ReporteCotizacion)
 router.put("/:id", [validarJWT, esAdminRole], UpdateCotizacion);
 router.delete("/:id", [validarJWT, esAdminRole], DeleteCotizacion);
 

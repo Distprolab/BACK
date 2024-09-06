@@ -6,6 +6,10 @@ Detalle.init(
   {
     ItemID: DataTypes.INTEGER,
     ItemName: DataTypes.STRING,
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
     ESTADO: { type: DataTypes.BOOLEAN },
   },
   {

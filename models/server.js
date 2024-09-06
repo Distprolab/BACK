@@ -3,7 +3,7 @@ const cors = require("cors");
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const db = require("../db/connection");
-const Sequelize  = require("sequelize");
+const Sequelize = require("sequelize");
 var xmlparser = require("express-xml-bodyparser");
 const socketIO = require("socket.io");
 const http = require("http");
@@ -11,6 +11,7 @@ const { desconectar, mensaje } = require("../sockets/sockets");
 const path = require("path");
 const { truncate } = require("fs");
 const { findLastIndex } = require("lodash");
+const Especialidad = require("./tipogrupo");
 require("../db/asociations");
 
 //const store=new session.MemoryStore;
@@ -53,6 +54,8 @@ class Server {
 			estadistica: "/api/report",
 			estadistica2: "/api/reportTotal",
 			provincia: "/api/provincia",
+			canton: "/api/canton",
+			parroquia: "/api/parroquia",
 			estadistica3: "/api/qc",
 			pdf: "/api/pdf",
 			pdfProcesos: "/api/procesos-pdf",
@@ -92,6 +95,23 @@ class Server {
 			accesoriocotizacion: "/api/accesoriocotizacion",
 			cotizacion: "/api/cotizacion",
 			correos: "/api/correos",
+			tipomuestra: "/api/tipomuestra",
+			/* nuevo ingreso de orden */
+
+			paciente: "/api/paciente",
+			medico: "/api/medico",
+			ingresorden: "/api/ingresorden",
+			perfiles: "/api/perfiles",
+			tiposervicio: "/api/tiposervicio",
+			tipoatencion: "/api/tipoatencion",
+			tipogrupo: "/api/tipogrupo",
+			diagnostico: "/api/diagnostico",
+			especialidad:"/api/especialidad",
+			equipocomplementario:"/api/equipocomplementario",
+			estadofinancieroproveedor:"/api/estadofinancieroproveedor",
+			estadofinancierocliente:"/api/estadofinancierocliente",
+			bodega:"/api/bodega",
+			result:"/api/result",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -138,7 +158,7 @@ class Server {
 	async dbConnection() {
 		try {
 			await db.authenticate();
-			 db.sync({ force: false }).then(() => {
+			db.sync({ force: false}).then(() => {
 				console.log("Database online");
 			});
 		} catch (error) {
@@ -183,7 +203,9 @@ class Server {
 		this.app.use(this.paths.estadisticaMicro, require("../routes/reportMicro"));
 		this.app.use(this.paths.estadistica2, require("../routes/reportTotal"));
 		this.app.use(this.paths.estadistica3, require("../routes/qc"));
-		this.app.use(this.paths.provincia, require("../routes/provincias"));
+		this.app.use(this.paths.provincia, require("../routes/provincia"));
+		this.app.use(this.paths.canton, require("../routes/canton"));
+		this.app.use(this.paths.parroquia, require("../routes/parroquia"));
 		this.app.use(this.paths.pdf, require("../routes/pdf")); //
 		this.app.use(this.paths.pdfProcesos, require("../routes/reportePdf"));
 		this.app.use(this.paths.agendamiento, require("../routes/agendamiento"));
@@ -241,6 +263,23 @@ class Server {
 		this.app.use(this.paths.cotizacion, require("../routes/cotizacion"));
 
 		this.app.use(this.paths.correos, require("../routes/correos"));
+		this.app.use(this.paths.tipomuestra, require("../routes/tipomuestra"));
+		/* nuevo ingresoorden */
+		this.app.use(this.paths.paciente, require("../routes/paciente"));
+		this.app.use(this.paths.medico, require("../routes/medico"));
+		this.app.use(this.paths.ingresorden, require("../routes/ingresorden"));
+		this.app.use(this.paths.perfiles, require("../routes/perfiles"));
+
+		this.app.use(this.paths.tipoatencion, require("../routes/tipoatencion"));
+		this.app.use(this.paths.tiposervicio, require("../routes/tiposercicio"));
+		this.app.use(this.paths.tipogrupo, require("../routes/tipogrupo"));
+		this.app.use(this.paths.diagnostico, require("../routes/diagnostico"));
+		this.app.use(this.paths.especialidad, require("../routes/especialidad"));
+		this.app.use(this.paths.equipocomplementario, require("../routes/equipocomplementario"));
+		this.app.use(this.paths.estadofinancieroproveedor, require("../routes/estadofinancieroproveedor"));
+		this.app.use(this.paths.estadofinancierocliente, require("../routes/estadofinancierocliente"));
+		this.app.use(this.paths.bodega, require("../routes/bodega"));
+		this.app.use(this.paths.result, require("../routes/result"));
 	}
 
 	listen() {

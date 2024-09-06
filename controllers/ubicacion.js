@@ -4,6 +4,7 @@ const Roles = require("../models/role");
 const { Op, where } = require("sequelize");
 const ubicacion = require("../models/ubicacion");
 const Ubicacion = require("../models/ubicacion");
+const Usuario = require("../models/usuarios");
 
 const consultaubicacion = async (req, res) => {
 	const ubicacion = await Ubicacion.findAll({
@@ -12,19 +13,55 @@ const consultaubicacion = async (req, res) => {
 					[Op.ne]: "ADMIN",
 				},
 			}, */
+			include:{
+				model: Usuario,
+				as:"usuario"
+			}
 	});
 
 	res.json({ ok: true, ubicacion });
 };
 
 const GetIDubicacion = async (req, res) => {
-	res.json({ usuarios });
+	const { id } = req.params;
+	const ubicacionId = await Ubicacion.findByPk(id, );
+
+	if (!ubicacionId) {
+		return res.status(400).json({
+			ok: false,
+			msg: `El id ${id} no existe`,
+		});
+	}
+	res.status(200).json({
+		ok: true,
+		ubicacionId,
+	});
+};
+
+
+const GetfiltroUbicacion = async (req, res) => {
+	const { busquedaubicacion } = req.params;
+
+	const dataCA = busquedaubicacion.replace(/\w\S*/g, function (e) {
+		return e.charAt(0).toUpperCase() + e.substring(1);
+	});
+
+	const ubicacion = await Ubicacion.findAll({
+		where: {
+			NOMBRE: {
+				[Op.like]: `%${dataCA}%`,
+			},
+		},
+	});
+
+	res.status(200).json({ ok: true, ubicacion });
 };
 
 const postubicacion = async (req, res) => {
 	const { NOMBRE } = req.body;
-
-	const ubicacions = new Ubicacion({ NOMBRE });
+	const user = req.usuario;
+	const ubicacions = new Ubicacion({ NOMBRE,CREATEDBY:user.id,
+		usuarioId:user.id });
 	const ubicacion = await Ubicacion.findOne({
 		where: {
 			NOMBRE: NOMBRE,
@@ -44,13 +81,29 @@ const postubicacion = async (req, res) => {
 };
 
 const ubicacionUpdate = async (req, res) => {
-	res.send("update guardada con exito..");
+	const id = req.body.id;
+
+	const ubicacions = await Ubicacion.findByPk(id);
+	if (!ubicacions) {
+		return res.status(404).json({ ok: true, msg: "no existe ubicacion" });
+	}
+
+	const { NOMBRE } = req.body;
+
+	await ubicacions.update(
+		{
+			NOMBRE
+		},
+		{ where: { id: id } }
+	);
+
+	res.status(200).json({ ok: true, msg: `Se actualizo con exito el ${NOMBRE}` });
 };
 
 const ubicacionDelete = async (req, res) => {
 	const id = req.params.id;
 	const { NOMBRE } = req.body;
-	const ubicacion = await ubicacion.findByPk(id);
+	const ubicacion = await Ubicacion.findByPk(id);
 	if (!ubicacion) {
 		return res.status(404).json({
 			msg: "El ubicacion  no existe...",
@@ -61,7 +114,7 @@ const ubicacionDelete = async (req, res) => {
 	);
 
 	res.status(200).json({
-		msg: `El nombre ${NOMBRE} a sido desactivado con exito...`,
+		msg: `La  ${ubicacion.dataValues.NOMBRE} a sido desactivado con exito...`,
 	});
 };
 
@@ -70,5 +123,6 @@ module.exports = {
 	ubicacionUpdate,
 	consultaubicacion,
 	postubicacion,
+	GetfiltroUbicacion,
 	GetIDubicacion,
 };

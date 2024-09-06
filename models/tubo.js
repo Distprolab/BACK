@@ -56,6 +56,10 @@ Tubo.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
   },
 
   {

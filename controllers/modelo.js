@@ -5,26 +5,76 @@ const { Op } = require("sequelize");
 const Modelo = require("../models/modelo");
 const Equipos = require("../models/equipos");
 const Analizador = require("../models/analizador");
+const Marca = require("../models/marca");
+const Usuario = require("../models/usuarios");
 
 const consultamodelo = async (req, res) => {
 	const modelo = await Modelo.findAll({
-		include:{
-			model:Analizador,
-			as:"instrumento"
-		} 
+		include: [
+			{
+				/* model: Analizador,
+				as: "instrumento",
+				include: { */
+					model: Marca,
+					as: "marca",
+				//},
+			},
+
+			{
+				model: Usuario,
+				as:"usuario"
+			}
+			
+		],
 	});
 	res.json({ ok: true, modelo });
 };
 
 const GetIDmodelo = async (req, res) => {
-	res.json({ usuarios });
+	const { id } = req.params;
+	const modeloId = await Modelo.findByPk(id, {
+		include: {
+			model: Analizador,
+			as: "instrumento",
+		},
+	});
+
+	if (!modeloId) {
+		return res.status(400).json({
+			ok: false,
+			msg: `El id ${id} no existe`,
+		});
+	}
+	res.status(200).json({
+		ok: true,
+		modeloId,
+	});
+};
+
+const GetfiltroModelo = async (req, res) => {
+	const { busquedamodelo } = req.params;
+
+	const dataCA = busquedamodelo.replace(/\w\S*/g, function (e) {
+		return e.charAt(0).toUpperCase() + e.substring(1);
+	});
+
+	const modelo = await Modelo.findAll({
+		where: {
+			NOMBRE: {
+				[Op.like]: `%${dataCA}%`,
+			},
+		},
+	});
+
+	res.status(200).json({ ok: true, modelo });
 };
 
 const postmodelo = async (req, res) => {
-	const { NOMBRE } = req.body;
-
-	const modelos = new Modelo({ NOMBRE });
-	const modelo = await Modelo.findOne({
+	const { NOMBRE, marcaId } = req.body;
+	const user = req.usuario;
+	const modelos = new Modelo({ NOMBRE,CREATEDBY:user.id,marcaId,
+		usuarioId:user.id });
+	/* const modelo = await Modelo.findOne({
 		where: {
 			NOMBRE: modelos.NOMBRE,
 		},
@@ -36,14 +86,14 @@ const postmodelo = async (req, res) => {
 		return res.status(400).json({
 			msg: "La categoria ya existe ",
 		});
-	}
+	} */
 
 	await modelos.save();
 	res.status(201).json({ msg: "Se registro con exito la categoria" });
 };
 
 const modeloUpdate = async (req, res) => {
-	const { id, NOMBRE } = req.body;
+	const { id, NOMBRE,marcaId } = req.body;
 	const modeloBD = await Modelo.findByPk(id);
 	if (!modeloBD) {
 		return res.status(404).json({
@@ -53,17 +103,15 @@ const modeloUpdate = async (req, res) => {
 	}
 	await Modelo.update(
 		{
-			NOMBRE,
+			NOMBRE,marcaId
 		},
 		{ where: { id: id } }
 	);
 
-	res
-		.status(200)
-		.json({
-			ok: true,
-			msg: `El modelo ${NOMBRE}a sido actualizado con exito..`,
-		});
+	res.status(200).json({
+		ok: true,
+		msg: `El modelo ${NOMBRE}a sido actualizado con exito..`,
+	});
 };
 
 const modeloDelete = async (req, res) => {
@@ -86,5 +134,6 @@ module.exports = {
 	modeloUpdate,
 	consultamodelo,
 	postmodelo,
+	GetfiltroModelo,
 	GetIDmodelo,
 };

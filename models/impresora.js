@@ -6,6 +6,10 @@ class Impresora extends Model {}
 Impresora.init(
   {
     NOMBRE: DataTypes.STRING,
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
     ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
   },
   {

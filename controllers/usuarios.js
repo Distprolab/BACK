@@ -35,7 +35,7 @@ const usuariosGetfiltro = async (req, res) => {
 	const dataCA = busquedausuario.replace(/\w\S*/g, function (e) {
 		return e.charAt(0).toUpperCase() + e.substring(1);
 	});
-	//  console.log(dataCA)
+
 	const data = await Usuario.findAll({
 		where: {
 			doctor: {

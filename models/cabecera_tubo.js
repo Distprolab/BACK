@@ -10,6 +10,10 @@ class Cabecera_Tubo extends Model {
 Cabecera_Tubo.init(
   {
     //CODPROCEDENCIA: DataTypes.INTEGER,
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
   },
   {
     sequelize,

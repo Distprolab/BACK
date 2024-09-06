@@ -136,6 +136,25 @@ const modeloPDF = `
 
     </head>
     <body>
+       <script>
+        function addPageBreaks() {
+            const footerHeight = document.getElementById('pageFooter').offsetHeight;
+            const listItems = document.querySelectorAll('ul');
+            
+            listItems.forEach((list) => {
+                const rect = list.getBoundingClientRect();
+                const listBottom = rect.bottom;
+                const pageHeight = window.innerHeight;
+
+                // Check if the list is close to the footer
+                if (listBottom > (pageHeight - footerHeight)) {
+                    list.classList.add('page-break');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', addPageBreaks);
+    </script>
         <div id="pageHeader" style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
         <img src="/Encabezado1.png" alt="" />
         </div>

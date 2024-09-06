@@ -7,6 +7,10 @@ Servicio.init(
     DLCPRO: DataTypes.STRING,
     NOMBRE: DataTypes.STRING,
     //ESTADO: { type: DataTypes.INTEGER, defaultValue: 1 },
+    USUARIO_ID: DataTypes.INTEGER,
+    CREATEDBY:DataTypes.INTEGER,
+    UPDATEDBY:DataTypes.INTEGER,
+    DELETEDBY:DataTypes.INTEGER,
   },
   {
     sequelize,

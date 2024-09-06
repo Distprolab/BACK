@@ -2,13 +2,14 @@ const { Router } = require("express");
 
 const { validarJWT } = require("../middleware/validar-jwt");
 const { esAdminRole, tieneRole } = require("../middleware/validar-roles");
-const { getAnalizador, createAnalizador, updateAnalizador, deleteAnalizador } = require("../controllers/analizador");
+const { getAnalizador, createAnalizador, updateAnalizador, deleteAnalizador, getBYIdAnalizador, GetfiltroAnalizador } = require("../controllers/analizador");
 
 const router = Router();
-router.get("/:id", validarJWT, esAdminRole, );
+router.get("/:id", validarJWT, tieneRole,getBYIdAnalizador );
 router.get("/", [validarJWT, tieneRole],getAnalizador);
-router.post("/", [validarJWT, esAdminRole],createAnalizador);
-router.put("/:id", [validarJWT, esAdminRole], updateAnalizador);
-router.delete("/:id", [validarJWT, esAdminRole],deleteAnalizador);
+router.get("/busquedaanalizador/:busquedaanalizador", [validarJWT, tieneRole],GetfiltroAnalizador);
+router.post("/", [validarJWT, tieneRole],createAnalizador);
+router.put("/:id", [validarJWT, tieneRole], updateAnalizador);
+router.delete("/:id", [validarJWT, tieneRole],deleteAnalizador);
 
 module.exports = router;
