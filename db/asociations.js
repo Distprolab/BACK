@@ -52,6 +52,12 @@ const Bodega = require("../models/bodega");
 Stock.belongsTo(Producto,{as:"product"}) */
 
 /* Relaciones de tablas con la tabla de usuarios */
+
+
+Bodega.hasMany(Itempedidostock,{as:"itempedidostock", foreignKey:"bodegaId"});
+Itempedidostock.belongsTo(Bodega,{as:"bodega"});
+
+
 Bodega.hasMany(ItemStock,{as:"stockItem", foreignKey:"bodegaId"});
 ItemStock.belongsTo(Bodega,{as:"bodega"});
 

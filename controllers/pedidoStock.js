@@ -19,6 +19,7 @@ const { PDFDocument, rgb, hasUtf16BOM, utf16Decode } = require("pdf-lib");
 const fs = require("fs");
 
 const pdf = require("html-pdf");
+const Bodega = require("../models/bodega");
 const getPedidoStock = async (req, res) => {
 	const pedidoStock = await PedidoStock.findAll({
 		/* where: {
@@ -29,7 +30,10 @@ const getPedidoStock = async (req, res) => {
 				model: Itempedidostock,
 				as: "itemstock",
 				attributes: ["ID_PRODUCTO", "CANTIDAD"],
-				 	include: [{ model: Producto, as: "product", attributes: ["NOMBRE"] }], 
+				include: [
+					{ model: Producto, as: "product", attributes: ["NOMBRE"] },
+					{ model: Bodega, as: "bodega" },
+				],
 			},
 			{
 				model: Usuario,
@@ -37,9 +41,6 @@ const getPedidoStock = async (req, res) => {
 				attributes: ["doctor"],
 			},
 		],
-		/*{ model: Cliente, as: "clientes", attributes: ["NOMBRE"] },
-			{ model: Marca, as: "marcas", attributes: ["NOMBRE"] },
-		], */
 	});
 	res.status(200).json({
 		ok: true,
@@ -53,7 +54,6 @@ const getAllPedidoStock = async (req, res) => {
 
 	const cantidadReservadaDetalle = [];
 	const promises = jsonPrueba.itemstock.map(async (item) => {
-		
 		const referencia = item.product.REFERENCIA;
 		const cantidad = item.CANTIDAD;
 
@@ -74,7 +74,7 @@ const getAllPedidoStock = async (req, res) => {
 				},
 			], */
 		});
-		console.log(`---->`, stokDisponiblePromises)
+		console.log(`---->`, stokDisponiblePromises);
 		const stockDisponible = await stokDisponiblePromises;
 		stockDisponible.sort(
 			(a, b) => new Date(a.caducidad) - new Date(b.caducidad)
@@ -142,11 +142,17 @@ const getFiltroPedidoStock = async (req, res) => {
 				as: "itemstock",
 				//attributes:["ID_PROVEEDOR","MARCA"]
 				attributes: ["ID_PRODUCTO", "CANTIDAD"],
-				include: {
-					model: Producto,
-					as: "product",
-					attributes: { exclude: ["createdAt", "updatedAt", "ESTADO"] },
-				},
+				include: [
+					{
+						model: Producto,
+						as: "product",
+						attributes: { exclude: ["createdAt", "updatedAt", "ESTADO"] },
+					},
+					{
+						model: Bodega,
+						as: "bodega",
+					},
+				],
 			},
 		],
 	});
@@ -161,11 +167,12 @@ const createPedidoStock = async (req, res) => {
 	await sequelize.transaction(async (t) => {
 		const pedidos = await PedidoStock.create(
 			{
-				//AREA,
+				AREA,
 
 				usuarioId: idUser.id,
 				userId: idUser.id,
 				clientesId: AREA,
+
 				/* marcasId: MARCA, */
 			},
 			{ transaction: t }
@@ -184,6 +191,7 @@ const createPedidoStock = async (req, res) => {
 						ENTREGADO: PRODUCTOS.ENTREGADO,
 						usuarioId: idUser.id,
 						userId: idUser.id,
+						bodegaId: AREA,
 					},
 					{ transaction: t }
 				);
@@ -201,7 +209,7 @@ const createPedidoStock = async (req, res) => {
 const updatePedidoStock = async (req, res) => {
 	const id = req.body.id;
 
-	const { PRODUCTOS } = req.body;
+	const { AREA, PRODUCTOS } = req.body;
 
 	await sequelize.transaction(async (t) => {
 		try {
@@ -268,25 +276,26 @@ const updatePedidoStock = async (req, res) => {
 					const lote = nuevosLotes[i];
 					console.log(`lote`, lote);
 					const cantidadEntregada = cantidadesEntregadas[i];
-				await Promise.all(
-					PRODUCTOS.map(async (item) => {
-						const { ENTREGADO, LOTE } = item;
-						console.log(`ok`, ENTREGADO, LOTE);
-						await Itempedidostock.update(
-							{
-								ENTREGADO: cantidadEntregada.split(','),
-								lote: lote.split(','),
-							},
-							{
-								where: {
-									pedidostockId: id,ID_PRODUCTO:ID_PRODUCTO
+					await Promise.all(
+						PRODUCTOS.map(async (item) => {
+							const { ENTREGADO, LOTE } = item;
+							console.log(`ok`, ENTREGADO, LOTE);
+							await Itempedidostock.update(
+								{
+									ENTREGADO: cantidadEntregada.split(","),
+									lote: lote.split(","),
 								},
-								transaction: t,
-							}
-						);
-					})
-				);
-			}
+								{
+									where: {
+										pedidostockId: id,
+										ID_PRODUCTO: ID_PRODUCTO,
+									},
+									transaction: t,
+								}
+							);
+						})
+					);
+				}
 				/*  await Itempedidostock.update(
 							{
 								lote: lotes,
@@ -313,29 +322,29 @@ const updatePedidoStock = async (req, res) => {
 
 const deletePedidoStock = async (req, res) => {
 	const { id } = req.params;
-console.log(id)
-	
-		const idPedido = await PedidoStock.findByPk(
-			id /* {
+	console.log(id);
+
+	const idPedido = await PedidoStock.findByPk(
+		id /* {
 			include: ["items"],
 		} */
-		);
+	);
 
-		if (!idPedido) {
-			return res.status(404).json({
-				ok: false,
-				msg: `No existe el pedido ${id}`,
-			});
-		}
+	if (!idPedido) {
+		return res.status(404).json({
+			ok: false,
+			msg: `No existe el pedido ${id}`,
+		});
+	}
 
-		await PedidoStock.update(
-			{
-				ESTADO: 0,
-			},
-			{ where: { id: id }}
-		);
+	await PedidoStock.update(
+		{
+			ESTADO: 0,
+		},
+		{ where: { id: id } }
+	);
 
-		/* 	await Promise.all(
+	/* 	await Promise.all(
 			idPedido.items.map(async (item) => {
 				const { ESTADO } = item;
 				await Itempedido.update(
@@ -352,16 +361,39 @@ console.log(id)
 			})
 		); */
 
-
 	res.status(200).json({
 		msg: "El pedido a sido desactivado con exito...",
 	});
 };
+const filtropedidoBodega = async (req, res) => {
+	const { bodegaId } = req.query;
+	let where = {};
+	if (bodegaId) {
+		where.bodegaId = bodegaId;
+	}
+	const stock = await Itempedidostock.findAll({
+		where,
+		include: {
+			model: Producto,
+			as: "product",
+		},
+		attributes: [
+			"productId",
+			"ID_PRODUCTO",
+			/* "caducidad", */
+			"lote",
+			[Sequelize.fn("SUM", Sequelize.col("CANTIDAD")), "CANTIDAD"],
+		],
+
+		group: ["ID_PRODUCTO", "lote", "productId" /*  "caducidad" */],
+	});
+
+	res.status(200).json({ ok: true, stock });
+};
 const getReportePdfPedidoStock = async (req, res) => {
 	const { id } = req.params;
 
-	const pedido = await PedidoStock.findByPk(id,{
-	
+	const pedido = await PedidoStock.findByPk(id, {
 		include: {
 			model: Itempedidostock,
 			as: "itemstock",
@@ -371,7 +403,7 @@ const getReportePdfPedidoStock = async (req, res) => {
 			},
 		},
 	});
-	console.log(`----->`,pedido);
+	console.log(`----->`, pedido);
 	if (!pedido) {
 		return res.status(400).json({ msg: "No existe orden creada" });
 	}
@@ -562,6 +594,22 @@ const getReportePdfPedidoStock = async (req, res) => {
 
 	//res.json({ok:true, pedido})
 };
+
+const updateStockPedido = async (req, res) => {
+	const { bodegaId, PRODUCTOS } = req.body;
+
+
+	Itempedidostock.decrement("CANTIDAD", {
+		by: CANTIDAD,
+		where: {
+			ID_PRODUCTO: 8,
+            bodegaId:bodegaId
+			/* CANTIDAD: 5 */
+		},
+	});
+
+	res.status(200).json({ ok: true, msg: "Producto actualizado en el BD" });
+};
 module.exports = {
 	getReportePdfPedidoStock,
 	getPedidoStock,
@@ -570,4 +618,6 @@ module.exports = {
 	createPedidoStock,
 	updatePedidoStock,
 	deletePedidoStock,
+	filtropedidoBodega,
+	updateStockPedido,
 };

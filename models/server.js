@@ -106,12 +106,13 @@ class Server {
 			tipoatencion: "/api/tipoatencion",
 			tipogrupo: "/api/tipogrupo",
 			diagnostico: "/api/diagnostico",
-			especialidad:"/api/especialidad",
-			equipocomplementario:"/api/equipocomplementario",
-			estadofinancieroproveedor:"/api/estadofinancieroproveedor",
-			estadofinancierocliente:"/api/estadofinancierocliente",
-			bodega:"/api/bodega",
-			result:"/api/result",
+			especialidad: "/api/especialidad",
+			equipocomplementario: "/api/equipocomplementario",
+			estadofinancieroproveedor: "/api/estadofinancieroproveedor",
+			estadofinancierocliente: "/api/estadofinancierocliente",
+			bodega: "/api/bodega",
+			result: "/api/result",
+			transferencia: "/api/transferencia",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -158,7 +159,7 @@ class Server {
 	async dbConnection() {
 		try {
 			await db.authenticate();
-			db.sync({ force: false}).then(() => {
+			db.sync({ force: false }).then(() => {
 				console.log("Database online");
 			});
 		} catch (error) {
@@ -275,11 +276,21 @@ class Server {
 		this.app.use(this.paths.tipogrupo, require("../routes/tipogrupo"));
 		this.app.use(this.paths.diagnostico, require("../routes/diagnostico"));
 		this.app.use(this.paths.especialidad, require("../routes/especialidad"));
-		this.app.use(this.paths.equipocomplementario, require("../routes/equipocomplementario"));
-		this.app.use(this.paths.estadofinancieroproveedor, require("../routes/estadofinancieroproveedor"));
-		this.app.use(this.paths.estadofinancierocliente, require("../routes/estadofinancierocliente"));
+		this.app.use(
+			this.paths.equipocomplementario,
+			require("../routes/equipocomplementario")
+		);
+		this.app.use(
+			this.paths.estadofinancieroproveedor,
+			require("../routes/estadofinancieroproveedor")
+		);
+		this.app.use(
+			this.paths.estadofinancierocliente,
+			require("../routes/estadofinancierocliente")
+		);
 		this.app.use(this.paths.bodega, require("../routes/bodega"));
 		this.app.use(this.paths.result, require("../routes/result"));
+		this.app.use(this.paths.transferencia, require("../routes/transferencia"));
 	}
 
 	listen() {

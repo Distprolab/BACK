@@ -1,3 +1,7 @@
+const { DataTypes, Model, Sequelize } = require("sequelize");
+const sequelize = require("../db/connection");
+
+
 class Transferencia extends Model {}
 
 Transferencia.init(
