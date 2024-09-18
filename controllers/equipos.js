@@ -14,6 +14,7 @@ const Estadofinancieroproveedor = require("../models/estadofinancieroproveedor")
 const Usuario = require("../models/usuarios");
 const Historicoubicacion = require("../models/historicoubicacion");
 const Historicoestado = require("../models/historicoestado");
+const { Op } = require("sequelize");
 const getEquipos = async (req, res) => {
 	const equipos = await Equipos.findAll({
 		include: [

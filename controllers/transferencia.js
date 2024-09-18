@@ -35,24 +35,19 @@ const postTransferencia = async (req, res) => {
 			}
 
 			productosEncontrados.push({
-				
 				producto: itemStock.dataValues.referencia,
 				nombre: itemStock.product.NOMBRE,
 				lote: itemStock.lote,
 				caducidad: itemStock.caducidad,
 				cantidad: itemStock.cantidad,
-
-				
 			});
 		}
 
-		res
-			.status(200)
-			.json({
-				ok: true,
-				productos: productosEncontrados,
-				productoNo: productosNoEncontrados,
-			});
+		res.status(200).json({
+			ok: true,
+			productos: productosEncontrados,
+			productoNo: productosNoEncontrados,
+		});
 	} catch (error) {
 		console.error("Error al procesar los productos:", error);
 		res

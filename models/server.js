@@ -113,6 +113,7 @@ class Server {
 			bodega: "/api/bodega",
 			result: "/api/result",
 			transferencia: "/api/transferencia",
+			dashboardviews:"/api/dashboardviews",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -291,6 +292,8 @@ class Server {
 		this.app.use(this.paths.bodega, require("../routes/bodega"));
 		this.app.use(this.paths.result, require("../routes/result"));
 		this.app.use(this.paths.transferencia, require("../routes/transferencia"));
+		this.app.use(this.paths.dashboardviews, require("../routes/dashboardviews"));
+
 	}
 
 	listen() {

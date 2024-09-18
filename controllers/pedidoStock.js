@@ -60,29 +60,24 @@ const getAllPedidoStock = async (req, res) => {
 		const stokDisponiblePromises = ItemStock.findAll({
 			where: { referencia: referencia },
 			attributes: [
-				[sequelize.fn("SUM", sequelize.col("CANTIDAD")), "cantidad"],
+				[sequelize.fn("SUM", sequelize.col("cantidad_recibida")), "cantidad"],
 				"referencia",
 				"lote",
 				"caducidad",
 				"productoId",
 			],
 			group: ["referencia", "lote", "caducidad", "productoId"],
-			/* include: [
-				{
-					model: Producto,
-					as: "product",
-				},
-			], */
 		});
 		console.log(`---->`, stokDisponiblePromises);
 		const stockDisponible = await stokDisponiblePromises;
 		stockDisponible.sort(
 			(a, b) => new Date(a.caducidad) - new Date(b.caducidad)
 		);
-
+console.log(stockDisponible)
 		let cantidadReservar = cantidad;
 		//console.log(stockDisponible)
 		stockDisponible.forEach((objeto, i, array) => {
+		//	console.log(`=======>`,objeto)
 			let cantidadDisponible = objeto.cantidad;
 
 			if (cantidadReservar <= 0) return;
@@ -98,6 +93,7 @@ const getAllPedidoStock = async (req, res) => {
 
 				cantidadReservar -= cantidadreservada;
 				cantidadReservadaDetalle.push({
+					productId:objeto.productoId,
 					referencia: objeto.referencia,
 					lote: objeto.lote,
 					producto: objeto.productoId,
@@ -106,24 +102,20 @@ const getAllPedidoStock = async (req, res) => {
 			}
 		});
 
-		/* res.status(200).json({
-			ok: true,
-			cantidadReservada: {
-				detalle: cantidadReservadaDetalle, // Detalle de la cantidad reservada por lote
-			},
-		}); */
+		
 	});
 
 	Promise.all(promises)
 		.then(() => {
 			console.log(cantidadReservadaDetalle);
-
+			
+//const detalle =Object.groupBy(cantidadReservadaDetalle,({referencia})=>referencia)
 			res.status(200).json({
 				ok: true,
-
-				cantidadReservada: {
-					detalle: cantidadReservadaDetalle, // Detalle de la cantidad reservada por lote
-				},
+				//cantidadReservada:detalle
+				 cantidadReservada: {
+					detalle: cantidadReservadaDetalle
+				}, 
 			});
 		})
 		.catch((error) => {
@@ -222,14 +214,14 @@ const updatePedidoStock = async (req, res) => {
 				],
 			});
 
-			if (!pedido) {
+			/* if (!pedido) {
 				throw new Error("No se encontró el pedido");
 			}
-
+ */
 			for (const producto of PRODUCTOS) {
 				const { CANTIDAD, ENTREGADO, LOTE, ID_PRODUCTO } = producto;
-				const lotes = LOTE.split(",");
-				const entregados = ENTREGADO;
+				 //lotes = LOTE.split(",");
+				//const entregados = ENTREGADO;
 				let cantidadesEntregadas = [];
 
 				if (typeof ENTREGADO === "string") {
@@ -244,10 +236,12 @@ const updatePedidoStock = async (req, res) => {
 				let nuevosLotes = [];
 				console.log(`cant1`, cantidadesEntregadas);
 				if (typeof LOTE === "string") {
-					nuevosLotes = LOTE.split(",");
-				} else if (Array.isArray(LOTE)) {
+					nuevosLotes = LOTE;
+				} else if (typeof LOTE === "number") {
 					nuevosLotes = LOTE;
 				}
+
+				console.log(`=======>`, nuevosLotes, cantidadesEntregadas);
 				for (let i = 0; i < nuevosLotes.length; i++) {
 					const lote = nuevosLotes[i];
 					console.log(`lote`, lote);
@@ -260,9 +254,9 @@ const updatePedidoStock = async (req, res) => {
 							lote: lote,
 						},
 						transaction: t,
-					});
+					}); 
 				}
-				await PedidoStock.update(
+				 await PedidoStock.update(
 					{
 						ESTADO: 2,
 					},
@@ -270,16 +264,16 @@ const updatePedidoStock = async (req, res) => {
 						where: { id: id },
 						transaction: t,
 					}
-				);
+				); 
 
 				for (let i = 0; i < nuevosLotes.length; i++) {
 					const lote = nuevosLotes[i];
-					console.log(`lote`, lote);
+					console.log(`lote===>>`, lote);
 					const cantidadEntregada = cantidadesEntregadas[i];
 					await Promise.all(
 						PRODUCTOS.map(async (item) => {
 							const { ENTREGADO, LOTE } = item;
-							console.log(`ok`, ENTREGADO, LOTE);
+							console.log(`ok for`, ENTREGADO, LOTE);
 							await Itempedidostock.update(
 								{
 									ENTREGADO: cantidadEntregada.split(","),
@@ -295,20 +289,7 @@ const updatePedidoStock = async (req, res) => {
 							);
 						})
 					);
-				}
-				/*  await Itempedidostock.update(
-							{
-								lote: lotes,
-								ENTREGADO: entregados,
-							},
-							{
-								where: {
-									pedidostockId: id,
-									ID_PRODUCTO: ID_PRODUCTO,
-								},
-								transaction: t,
-							}
-						); */
+				} 
 			}
 		} catch (error) {
 			console.log(error);
@@ -367,6 +348,7 @@ const deletePedidoStock = async (req, res) => {
 };
 const filtropedidoBodega = async (req, res) => {
 	const { bodegaId } = req.query;
+	console.log(`------>`, bodegaId);
 	let where = {};
 	if (bodegaId) {
 		where.bodegaId = bodegaId;
@@ -380,12 +362,12 @@ const filtropedidoBodega = async (req, res) => {
 		attributes: [
 			"productId",
 			"ID_PRODUCTO",
-			/* "caducidad", */
+			"bodegaId",
 			"lote",
 			[Sequelize.fn("SUM", Sequelize.col("CANTIDAD")), "CANTIDAD"],
 		],
 
-		group: ["ID_PRODUCTO", "lote", "productId" /*  "caducidad" */],
+		group: ["ID_PRODUCTO", "lote", "productId", "bodegaId"],
 	});
 
 	res.status(200).json({ ok: true, stock });
@@ -596,15 +578,22 @@ const getReportePdfPedidoStock = async (req, res) => {
 };
 
 const updateStockPedido = async (req, res) => {
-	const { bodegaId, PRODUCTOS } = req.body;
-
-
+	const {
+		productId,
+		ID_PRODUCTO,
+		bodegaId,
+		lote,
+		CANTIDAD,
+		product,
+		descargo,
+	} = req.body;
+	console.log(`---------->`, req.body);
 	Itempedidostock.decrement("CANTIDAD", {
-		by: CANTIDAD,
+		by: Number(descargo),
 		where: {
-			ID_PRODUCTO: 8,
-            bodegaId:bodegaId
-			/* CANTIDAD: 5 */
+			ID_PRODUCTO: ID_PRODUCTO,
+			bodegaId: bodegaId,
+			//lote:lote,
 		},
 	});
 

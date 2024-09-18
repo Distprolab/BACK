@@ -160,29 +160,29 @@ const getBusquedaStock = async (req, res) => {
 		],
 
 		group: ["referencia", "bodegaId", "lote", "productId", "caducidad"],
-	}) 
-	const allStock = busquedaStock.reduce((acc, item) => {
-	
-	const referencia = item.referencia;
-	const nombre = item.product.NOMBRE;
-	if (!acc[referencia]) {
-		acc[referencia] = {
-			referencia: referencia,
-			nombre: nombre,
-			detalles: [],
-			total_referencia: 0,
-		};
-	}
-	acc[referencia].detalles.push({
-		lote: item.lote,
-		bodega:item.bodegaId,
-		TOTAL: item.get("TOTAL"),
-		caducidad: item.caducidad,
 	});
-	acc[referencia].total_referencia += Number(item.get("TOTAL"));
-	return acc;
-}, {});
-const finalResults = Object.values(allStock); finalResults
+	const allStock = busquedaStock.reduce((acc, item) => {
+		const referencia = item.referencia;
+		const nombre = item.product.NOMBRE;
+		if (!acc[referencia]) {
+			acc[referencia] = {
+				referencia: referencia,
+				nombre: nombre,
+				detalles: [],
+				total_referencia: 0,
+			};
+		}
+		acc[referencia].detalles.push({
+			lote: item.lote,
+			bodega: item.bodegaId,
+			TOTAL: item.get("TOTAL"),
+			caducidad: item.caducidad,
+		});
+		acc[referencia].total_referencia += Number(item.get("TOTAL"));
+		return acc;
+	}, {});
+	const finalResults = Object.values(allStock);
+	finalResults;
 	res.status(200).json({ ok: true, resultados: finalResults });
 };
 const getFiltroStock = async (req, res) => {
@@ -588,6 +588,231 @@ const deleteStock = async (req, res) => {
 	});
 };
 
+const getStockPdf = async (req, res) => {
+	//const {id}=req.params;
+	const stock = await ItemStock.findAll({
+		include:[ {
+			model: Producto,
+			as: "product",
+		},{
+model:Bodega,
+as:"bodega"
+		}],
+	});
+	function convertirFecha(fecha) {
+		const date = new Date(fecha);
+
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes (0-11) + 1
+		const day = String(date.getDate()).padStart(2, "0"); // Día del mes (1-31)
+
+		return `${year}/${month}/${day}`;
+	}
+	let totalGeneral = 0;
+
+	const htmlRows  = stock
+		.map((key) => {
+			const totalPorProducto = key.cantidad * key.product.VALOR;
+			totalGeneral += totalPorProducto;
+			return `
+			<tr>
+				<td>${key.product.REFERENCIA}</td>
+				<td>${key.product.NOMBRE}</td>							
+				<td>${key.bodega.NOMBRE}</td>
+				<td>${convertirFecha(key.caducidad)}</td>
+				<td>${key.lote}</td>
+					<td>${key.cantidad}</td>
+					<td>${key.product.VALOR}</td>
+				<td>${totalPorProducto.toFixed(2)}</td>
+			</tr>
+			
+		`;
+		})
+		.join("")
+	const modeloPDF = `
+<!Doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+            <title>PDF Result Template</title>
+            <style>
+                body {
+                    font-family: Georgia,'Times New Roman', Times, serif;
+                    margin: 20px  50px;
+                    font-size: 0.7rem;
+      
+                      }
+
+                h1{
+                    text-align: center;
+       
+                      }
+                p{
+                    margin:5px 70px;
+                   }
+
+                .fila1{
+                    padding:20px;
+                    margin:0 auto;
+                    margin-left:20px
+                     }
+
+
+                     .fila {
+                        display: flex;
+                        justify-content: space-between; 
+                        align-items: center;
+                    }
+                    
+                    .fila > div {
+                        flex: 1; 
+                        margin: 0 10px; 
+                    }
+
+                .fila2{
+                    display:inline-block;
+                    padding:20px;
+                    margin-left:30px;
+
+                        }
+
+                .text_fila{
+                    margin-left:60px;
+                        }
+
+                table {
+                    border-collapse: collapse;
+                    width: 90%;
+                    margin:0 auto;
+                    border: 1px solid #dddddd;
+                        }
+
+                th, td {
+                    border: 1px solid #dddddd;
+                    text-align: left;
+                    padding: 5px;
+                        }
+
+                th {
+                    background-color: #f2f2f2;
+                    font-size: 12px;
+                    font-weight: bold;
+                        }
+
+                td {
+                    font-size: 11px;
+                        }
+
+                .li_text{
+                    list-style: none;
+                    padding:10px;
+                    margin 7px auto;
+
+                        }
+                        .fila_areas {
+                            column-count: 2; /* Establece dos columnas */
+                            column-gap: 20px; /* Espacio entre las columnas */
+                            margin-bottom: 80px; /* Espacio adicional al final */
+                        }
+                
+                     
+                .equipo_text{
+                    display: flex-box;
+                    flex-wrap:no-wrap;
+                     justify-content: space-between;
+                        }
+
+                        .page-break {
+                            page-break-before: always;
+                        }
+            </style>
+
+
+
+    </head>
+    <body>
+        <div id="pageHeader" style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+        <img src="/Encabezado1.png" alt="" />
+        </div>
+        <div id="pageFooter" style="border-top: 1px solid #ddd; padding-top: 5px;">
+            <p style="color: #666; width: 70%; margin: 0; padding-bottom: 5px; text-align: let; font-family: sans-serif; font-size: .65em; float: left;"><p>Generado por: </p></h4>
+            <p style="color: #666; margin: 0; padding-bottom: 5px; text-align: right; font-family: sans-serif; font-size: .65em">Página {{ page }} de {{ pages }}</h4>
+        </div>
+
+        <h1> Reporte General Stock </h1>
+       
+
+<div class="fila">
+<div>
+    <h4>Area:</h4>
+    <p></p>
+	<h4>Fecha:</h4>
+	<p></p>
+</div>
+
+</div>
+
+        
+
+         <div >
+        <table>
+            <thead>
+                <tr>
+         
+                    <th>Referencia</th>
+					<th>Descripcion del producto</th>
+                    <th>Bodega</th>
+                    <th>Fecha caducidad</th>
+                    <th>Lote </th>
+					<th>Cantidad </th>
+					<th>Precio Unitario</th>
+					<th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+            
+ ${htmlRows}
+      <tr>
+        <td colspan="7" style="text-align: right; font-weight: bold;">Total General:</td>
+        <td>${totalGeneral.toFixed(2)}</td> <!-- Mostrar el total general -->
+      </tr>
+
+        </tbody>
+        </table>
+        </div>
+       
+        
+    </body>
+</html>
+ `;
+
+	const opcionesPDF = {
+		format: "Letter",
+		orientation: "portrait",
+		border: {
+			top: "1px", // default is 0, units: mm, cm, in, px
+			right: "3px",
+			bottom: "2px",
+			left: "3px",
+		},
+	};
+
+	pdf.create(modeloPDF, opcionesPDF).toStream((err, stream) => {
+		if (err) {
+			console.error(err);
+			return res.status(500).json({ error: "Error al generar el archivo PDF" });
+		}
+
+		res.setHeader("Content-Type", "application/pdf");
+		res.setHeader(
+			"Content-Disposition",
+			'attachment; filename="ReporteStock.pdf"'
+		);
+
+		stream.pipe(res);
+	});
+};
+
 module.exports = {
 	getStock,
 	getFiltroStock,
@@ -596,4 +821,5 @@ module.exports = {
 	createStock,
 	updateStock,
 	deleteStock,
+	getStockPdf,
 };
