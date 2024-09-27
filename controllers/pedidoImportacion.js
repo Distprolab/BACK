@@ -21,11 +21,11 @@ const getPedido = async (req, res) => {
 				attributes: ["ID_PRODUCTO", "CANTIDAD"],
 				include: [{ model: Producto, as: "product", attributes: ["NOMBRE"] }],
 			},
-			{
+			/* {
 				model: Usuario,
 				as: "user",
 				attributes: ["doctor"],
-			},
+			}, */
 			{ model: Cliente, as: "clientes", attributes: ["NOMBRE"] },
 			{ model: Marca, as: "marcas", attributes: ["NOMBRE"] },
 		],
@@ -134,8 +134,8 @@ const getFiltroPedido = async (req, res) => {
 
 const createPedido = async (req, res) => {
 	const idUser = req.usuario;
-	const { id,ID_PROVEEDOR, MARCA, PRODUCTOS } = req.body;
-	console.log(`aaqui`,req.body);
+	const { id, ID_PROVEEDOR, MARCA, PRODUCTOS } = req.body;
+	console.log(`aaqui`, req.body);
 	await sequelize.transaction(async (t) => {
 		const pedidos = await Pedido.create(
 			{
@@ -145,7 +145,7 @@ const createPedido = async (req, res) => {
 				userId: idUser.id,
 				clientesId: ID_PROVEEDOR,
 				marcasId: MARCA,
-				pedidosId:id
+				pedidosId: id,
 			},
 			{ transaction: t }
 		);
@@ -167,7 +167,7 @@ const createPedido = async (req, res) => {
 
 		await pedidos.setItems(itempedidos, { transaction: t });
 	});
- 
+
 	res.status(201).json({
 		msg: "El pedido a sido registrado con exito",
 	});
@@ -199,22 +199,16 @@ const updatePedido = async (req, res) => {
 							where: {
 								pedidoId: id,
 							},
-							transaction:t
+							transaction: t,
 						}
 					);
 				})
 			);
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 		}
-
-		
 	});
-	res.status(200).json({ ok: true, msg: `El pedido ${id} a sido actualizado` }); 
-
-
-
-	
+	res.status(200).json({ ok: true, msg: `El pedido ${id} a sido actualizado` });
 };
 
 const deletePedido = async (req, res) => {

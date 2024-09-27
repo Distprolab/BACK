@@ -12,6 +12,7 @@ const pdf = require("html-pdf");
 const Bodega = require("../models/bodega");
 const getStock = async (req, res) => {
 	const all = await ItemStock.findAll({
+		where: { bodegaId: 1 },
 		include: {
 			model: Producto,
 			as: "product",
@@ -591,13 +592,17 @@ const deleteStock = async (req, res) => {
 const getStockPdf = async (req, res) => {
 	//const {id}=req.params;
 	const stock = await ItemStock.findAll({
-		include:[ {
-			model: Producto,
-			as: "product",
-		},{
-model:Bodega,
-as:"bodega"
-		}],
+		where:{bodegaId:1},
+		include: [
+			{
+				model: Producto,
+				as: "product",
+			},
+			{
+				model: Bodega,
+				as: "bodega",
+			},
+		],
 	});
 	function convertirFecha(fecha) {
 		const date = new Date(fecha);
@@ -610,9 +615,9 @@ as:"bodega"
 	}
 	let totalGeneral = 0;
 
-	const htmlRows  = stock
+	const htmlRows = stock
 		.map((key) => {
-			const totalPorProducto = key.cantidad * key.product.VALOR;
+			const totalPorProducto = key.cantidad_recibida * key.product.VALOR;
 			totalGeneral += totalPorProducto;
 			return `
 			<tr>
@@ -621,14 +626,14 @@ as:"bodega"
 				<td>${key.bodega.NOMBRE}</td>
 				<td>${convertirFecha(key.caducidad)}</td>
 				<td>${key.lote}</td>
-					<td>${key.cantidad}</td>
+					<td>${key.cantidad_recibida}</td>
 					<td>${key.product.VALOR}</td>
 				<td>${totalPorProducto.toFixed(2)}</td>
 			</tr>
 			
 		`;
 		})
-		.join("")
+		.join("");
 	const modeloPDF = `
 <!Doctype html>
 <html>

@@ -6,14 +6,14 @@ const { getEquipos, createEquipos, updateEquipos, deleteEquipos, GetIdEquipos, G
 
 const router = Router();
 router.get("/:id", validarJWT, tieneRole, GetIdEquipos);
-router.get("/", getEquipos);
+router.get("/", [validarJWT, tieneRole],getEquipos);
 router.get(
-    "/busquedaequipo/:busquedaequipo",
+    "/busquedaequipo/busquedas",
     [validarJWT, tieneRole],
     GetfiltroEquipo,
   );
-router.post("/", [validarJWT, esAdminRole],createEquipos);
-router.put("/:id", [validarJWT, esAdminRole], updateEquipos);
-router.delete("/:id", [validarJWT, esAdminRole],deleteEquipos);
+router.post("/", [validarJWT, tieneRole],createEquipos);
+router.put("/:id", [validarJWT, tieneRole], updateEquipos);
+router.delete("/:id", [validarJWT, tieneRole],deleteEquipos);
 
 module.exports = router;

@@ -113,7 +113,10 @@ class Server {
 			bodega: "/api/bodega",
 			result: "/api/result",
 			transferencia: "/api/transferencia",
-			dashboardviews:"/api/dashboardviews",
+			dashboardviews: "/api/dashboardviews",
+			unidad: "/api/unidad",
+			tipofisiologico: "/api/tipofisiologico",
+			unidadedad: "/api/unidadedad",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -292,8 +295,25 @@ class Server {
 		this.app.use(this.paths.bodega, require("../routes/bodega"));
 		this.app.use(this.paths.result, require("../routes/result"));
 		this.app.use(this.paths.transferencia, require("../routes/transferencia"));
-		this.app.use(this.paths.dashboardviews, require("../routes/dashboardviews"));
+		this.app.use(
+			this.paths.dashboardviews,
+			require("../routes/dashboardviews")
+		);
 
+		this.app.use(
+			this.paths.tipofisiologico,
+			require("../routes/tipofisiologico")
+		);
+
+		this.app.use(
+			this.paths.unidadedad,
+			require("../routes/unidadedad")
+		);
+
+		this.app.use(
+			this.paths.unidad,
+			require("../routes/unidad")
+		);
 	}
 
 	listen() {

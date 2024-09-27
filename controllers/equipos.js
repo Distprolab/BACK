@@ -5,6 +5,7 @@ const Modelo = require("../models/modelo");
 const Marca = require("../models/marca");
 const Ubicacion = require("../models/ubicacion");
 const Estado = require("../models/estado");
+const moment = require('moment');
 const Accesorio = require("../models/accesorio");
 const Equipocomplementario = require("../models/equiposcomplementarios");
 const { sequelize } = require("../models/equipos");
@@ -68,11 +69,14 @@ const getEquipos = async (req, res) => {
 				model: Usuario,
 				as: "usuario",
 			},
-		], 
+		],
+		order: [
+			['id', 'DESC']
+		]
 	});
-   
 
- 
+
+
 	res.status(200).json({ ok: true, equipos: equipos });
 };
 
@@ -145,18 +149,94 @@ const GetIdEquipos = async (req, res) => {
 };
 
 const GetfiltroEquipo = async (req, res) => {
-	const { busquedaequipo } = req.params;
+	const { marca, equipo, modelo, ubicacion, serie } = req.query;
+	console.log(req.query)
+	let where = {};
+	if (marca) {
+		where.marcaId = {
+			[Op.eq]: marca
+		};
+	}
 
-	const dataCA = busquedaequipo.replace(/\w\S*/g, function (e) {
-		return e.charAt(0).toUpperCase() + e.substring(1);
-	});
+	if (equipo) {
+		where.analizadorId = {
+			[Op.eq]: equipo
+		};
+	}
+
+	if (modelo) {
+		where.modeloId = {
+			[Op.eq]: modelo
+		};
+	}
+    if (serie) {
+		where.serie = {
+			[Op.eq]: serie
+		};
+	}
+/* 	if (ubicacion) {
+		where.ubicacionId = {
+			[Op.eq]: ubicacion
+		};
+	} */
 
 	const equipos = await Equipos.findAll({
-		where: {
-			NOMBRE: {
-				[Op.like]: `%${dataCA}%`,
+		where,
+		include: [
+			{ model: Analizador, as: "instrumento" },
+			{
+				model: Modelo,
+				as: "modelo",
 			},
-		},
+			{
+				model: Marca,
+				as: "marca",
+			},
+			{
+				model: Historicoubicacion,
+				as: "historicoubicacion",
+				where: ubicacion ? { ubicacionId: { [Op.eq]: ubicacion } } : {}, 
+				order: [["fecha", "DESC"]],
+				//where: ubicacion ? { ubicacionId: { [Op.eq]: ubicacion } } : undefined,
+				
+				limit: 1,
+				include: {
+					model: Ubicacion,
+					as: "ubicacion",
+				},
+			},
+			{
+				model: Historicoestado,
+				as: "historicoestado",
+
+				order: [["fecha", "DESC"]],
+				limit: 1,
+				include: {
+					model: Estado,
+					as: "estado",
+				},
+			},
+			{
+				model: Estadofinancierocliente,
+				as: "estadocliente",
+			},
+			{
+				model: Estadofinancieroproveedor,
+				as: "estadoproveedor",
+			},
+			{
+				model: Accesorio,
+				as: "acc",
+				include: {
+					model: Equipocomplementario,
+					as: "equipocomplementarios",
+				},
+			},
+			{
+				model: Usuario,
+				as: "usuario",
+			},
+		],
 	});
 
 	res.status(200).json({ ok: true, equipos });
@@ -166,7 +246,8 @@ const createEquipos = async (req, res) => {
 	console.log(req.body);
 	const user = req.usuario;
 	const {
-		NOMBRE,
+		//NOMBRE,
+		analizadorId,
 		fecha,
 		CATEGORIA,
 		marcaId,
@@ -200,8 +281,8 @@ const createEquipos = async (req, res) => {
 
 		const nuevoEquipo = await Equipos.create(
 			{
-				analizadorId: NOMBRE,
-				instrumentoId: NOMBRE,
+				analizadorId: analizadorId,
+				instrumentoId: analizadorId,
 				fecha,
 				modeloId,
 				marcaId,
@@ -239,7 +320,9 @@ const createEquipos = async (req, res) => {
 		for (const accesorio of ACC) {
 			accesorio.equipoId = nuevoEquipo.id; // Asocia el accesorio con el equipo
 		}
-
+		ACC.forEach(item => {
+			item.fechacom = item.fechacom && moment(item.fechacom).isValid() ? item.fechacom : null;
+		});
 		await Accesorio.bulkCreate(ACC, { transaction: t });
 
 		// Confirma la transacción
@@ -251,6 +334,7 @@ const createEquipos = async (req, res) => {
 		console.log(error);
 		// Rechaza la transacción en caso de error
 		await t.rollback();
+		console.log(error);
 		return res
 			.status(500)
 			.json({ ok: false, msg: "Error al crear el equipo", error });
@@ -261,7 +345,7 @@ const updateEquipos = async (req, res) => {
 	const { id } = req.params;
 	//console.log(req.body);
 	const {
-		NOMBRE,
+		analizadorId,
 		CATEGORIA,
 		fecha,
 		MARCA_ID,
@@ -294,7 +378,8 @@ const updateEquipos = async (req, res) => {
 
 			await Equipos.update(
 				{
-					NOMBRE,
+					analizadorId: analizadorId,
+					instrumentoId: analizadorId,
 					modeloId: CATEGORIA,
 					marcaId: MARCA_ID,
 					//estadoId: ESTADO_ID,
@@ -347,7 +432,7 @@ const updateEquipos = async (req, res) => {
 			// 2. Actualizar o agregar nuevos accesorios
 			await Promise.all(
 				ACC.map(async (item) => {
-					const { DESCRIPCION, equipocomplementariosId, SERIEACC, MARCA } =
+					const { DESCRIPCION, fechacom, equipocomplementariosId, SERIEACC, MARCA } =
 						item;
 
 					// Si el accesorio ya existe, actualízalo
@@ -365,11 +450,13 @@ const updateEquipos = async (req, res) => {
 								DESCRIPCION,
 								SERIEACC,
 								MARCA,
+								//fechacom: fechacom ? fechacom : null,
+								fechacom: fechacom && moment(fechacom).isValid() ? fechacom : null,
 							},
 							{ transaction: t }
 						);
 						res.status(200).json({
-							msg: `Se actualizo el equipo ${NOMBRE}  con exito`,
+							msg: `Se actualizo el equipo   con exito`,
 						});
 					} else {
 						// Si no existe, crea un nuevo accesorio
@@ -379,6 +466,8 @@ const updateEquipos = async (req, res) => {
 								equipocomplementariosId,
 								SERIEACC,
 								MARCA,
+								//fechacom: fechacom ? fechacom : null,
+								fechacom: fechacom && moment(fechacom).isValid() ? fechacom : null,
 								equipoId: id,
 							},
 							{ transaction: t }
@@ -387,12 +476,12 @@ const updateEquipos = async (req, res) => {
 				})
 			);
 			res.status(200).json({
-				msg: `Se actualizo el equipo ${NOMBRE}  con exito`,
+				msg: `Se actualizo el equipo   con exito`,
 			});
 		} catch (error) {
 			res.status(500).json({
 				ok: false,
-				msg: "Hubo un error al actualizar el equipo",
+				msg: error,
 			});
 		}
 	});

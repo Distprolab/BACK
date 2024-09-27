@@ -113,6 +113,9 @@ const createProductos = async (req, res) => {
 		});
 	}
 };
+
+
+
 const postProductos = async (req, res) => {
 	const { REFERENCIA, NOMBRE, CATEGORIA, UNIDAD, GENERACION, VALOR } = req.body;
 

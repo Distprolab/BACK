@@ -23,8 +23,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 const router = Router();
-router.get("/", [validarJWT, tieneRole],getProductos);
-router.get("/producto/:id", [validarJWT, tieneRole],getByIdProductos);
+router.get("/", [validarJWT, tieneRole], getProductos);
+router.get("/producto/:id", [validarJWT, tieneRole], getByIdProductos);
 router.get("/:q", [validarJWT, tieneRole], getByProductos);
 router.post(
 	"/",
@@ -36,7 +36,7 @@ router.post(
 );
 router.post(
 	"/producto",
-	
+
 	validarJWT,
 	tieneRole,
 
@@ -51,10 +51,9 @@ router.post(
 	postProductos
 ); */
 
-
 router.put(
 	"/:id",
-	
+
 	validarJWT,
 	tieneRole,
 
