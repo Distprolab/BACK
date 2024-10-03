@@ -117,6 +117,7 @@ class Server {
 			unidad: "/api/unidad",
 			tipofisiologico: "/api/tipofisiologico",
 			unidadedad: "/api/unidadedad",
+			rangos: "/api/rangos",
 		};
 		// Conectar a base de datos
 		this.dbConnection();
@@ -305,15 +306,10 @@ class Server {
 			require("../routes/tipofisiologico")
 		);
 
-		this.app.use(
-			this.paths.unidadedad,
-			require("../routes/unidadedad")
-		);
+		this.app.use(this.paths.unidadedad, require("../routes/unidadedad"));
 
-		this.app.use(
-			this.paths.unidad,
-			require("../routes/unidad")
-		);
+		this.app.use(this.paths.unidad, require("../routes/unidad"));
+		this.app.use(this.paths.rangos, require("../routes/rangoreferencia"));
 	}
 
 	listen() {

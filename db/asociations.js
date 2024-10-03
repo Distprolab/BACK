@@ -47,20 +47,69 @@ const Estadofinancierocliente = require("../models/estadofinancierocliente");
 const Historicoubicacion = require("../models/historicoubicacion");
 const Historicoestado = require("../models/historicoestado");
 const Bodega = require("../models/bodega");
+const Rango = require("../models/rangosreferencia");
+const Tipofisiologico = require("../models/tipofisiologico");
+const Unidad = require("../models/unidad");
+const Unidadedad = require("../models/unidadedad");
+const Orden = require("../models/ordenes");
+const Prueba = require("../models/pruebas");
+const Paciente = require("../models/paciente");
+const Medico = require("../models/medico");
+const Diagnostico = require("../models/diagnostico");
+const Tiposervicio = require("../models/tiposervicio");
+const Tipoatencion = require("../models/Tipoatencion");
 
 /* Producto.hasMany(Stock,{as:"inventario",foreignKey:"productoId"});
 Stock.belongsTo(Producto,{as:"product"}) */
 
 /* Relaciones de tablas con la tabla de usuarios */
+Panel_pruebas.hasMany(Rango, { as: "rango", foreignKey: "panelpruebaId" });
+Rango.belongsTo(Panel_pruebas, { as: "panelpruebas" });
+
+Tipofisiologico.hasMany(Rango, {
+	as: "rango",
+	foreignKey: "tipofisiologicoId",
+});
+Rango.belongsTo(Tipofisiologico, { as: "tipofisiologico" });
+
+Unidad.hasMany(Rango, { as: "rango", foreignKey: "unidadId" });
+Rango.belongsTo(Unidad, { as: "unidad" });
+
+Unidadedad.hasMany(Rango, { as: "rango", foreignKey: "unidadedadId" });
+Rango.belongsTo(Unidadedad, { as: "unidadedad" });
 
 
-Bodega.hasMany(Itempedidostock,{as:"itempedidostock", foreignKey:"bodegaId"});
-Itempedidostock.belongsTo(Bodega,{as:"bodega"});
+
+Orden.hasMany(Prueba, { as: "prueba", foreignKey: "ordenId" });
+Prueba.belongsTo(Orden, { as: "orden" });
+
+Paciente.hasMany(Orden, { as: "orden", foreignKey: "pacienteId" });
+Orden.belongsTo(Paciente, { as: "paciente" });
+
+Medico.hasMany(Orden, { as: "orden", foreignKey: "medicoId" });
+Orden.belongsTo(Medico, { as: "medico" });
+
+Diagnostico.hasMany(Orden, { as: "orden", foreignKey: "diagnosticoId" });
+Orden.belongsTo(Diagnostico, { as: "diagnostico" });
+
+Tiposervicio.hasMany(Orden, { as: "orden", foreignKey: "tiposervicioId" });
+Orden.belongsTo(Tiposervicio, { as: "servicio" });
+
+Tipoatencion.hasMany(Orden, { as: "orden", foreignKey: "tipoatencionId" });
+Orden.belongsTo(Tipoatencion, { as: "atencion" });
+
+Panel_pruebas.hasMany(Prueba, { as: "prueba", foreignKey: "panelpruebaId" });
+Prueba.belongsTo(Panel_pruebas, { as: "panelprueba" });
 
 
-Bodega.hasMany(ItemStock,{as:"stockItem", foreignKey:"bodegaId"});
-ItemStock.belongsTo(Bodega,{as:"bodega"});
+Bodega.hasMany(Itempedidostock, {
+	as: "itempedidostock",
+	foreignKey: "bodegaId",
+});
+Itempedidostock.belongsTo(Bodega, { as: "bodega" });
 
+Bodega.hasMany(ItemStock, { as: "stockItem", foreignKey: "bodegaId" });
+ItemStock.belongsTo(Bodega, { as: "bodega" });
 
 Usuario.hasMany(Marca, { as: "marca", foreignKey: "usuarioId" });
 Marca.belongsTo(Usuario, { as: "usuario" });
@@ -130,16 +179,15 @@ Analizador.belongsTo(Marca, { as: "marca" });
 
 /* fin */
 
-
-Marca.hasMany(Modelo,{as:"modelo",foreignKey:"marcaId"});
-Modelo.belongsTo(Marca,{as:"marca"});
+Marca.hasMany(Modelo, { as: "modelo", foreignKey: "marcaId" });
+Modelo.belongsTo(Marca, { as: "marca" });
 
 Perfil.hasMany(Itemprueba, { as: "itempruebas", foreignKey: "perfilId" });
 Itemprueba.belongsTo(Perfil, { as: "perfiles" });
 
 Itemprueba.belongsTo(Panel_pruebas, {
 	as: "panelprueba",
-	foreignKey: "panelpruebaId",
+	foreignKey: "itempruebaId",/* cambie pruebaId */
 });
 Panel_pruebas.belongsTo(Itemprueba, { as: "itempruebas" });
 
@@ -210,19 +258,29 @@ Equipos.belongsTo(Estadofinancierocliente, { as: "estadocliente" });
 /* Ubicacion.hasMany(Equipos, { as: "equipos", foreignKey: "ubicacionId" });
 Equipos.belongsTo(Ubicacion, { as: "ubicacion" }); */
 
-Equipos.hasMany(Historicoubicacion,{as:"historicoubicacion", foreignKey:"equipoId"});
+Equipos.hasMany(Historicoubicacion, {
+	as: "historicoubicacion",
+	foreignKey: "equipoId",
+});
 Historicoubicacion.belongsTo(Equipos, { as: "equipos" });
 
-Equipos.hasMany(Historicoestado,{as:"historicoestado", foreignKey:"equipoId"});
+Equipos.hasMany(Historicoestado, {
+	as: "historicoestado",
+	foreignKey: "equipoId",
+});
 Historicoestado.belongsTo(Equipos, { as: "equipos" });
 
-
-Ubicacion.hasMany(Historicoubicacion, { as: "historicoubicacion", foreignKey: "ubicacionId" });
+Ubicacion.hasMany(Historicoubicacion, {
+	as: "historicoubicacion",
+	foreignKey: "ubicacionId",
+});
 Historicoubicacion.belongsTo(Ubicacion, { as: "ubicacion" });
 
-Estado.hasMany(Historicoestado, { as: "historicoestado", foreignKey: "estadoId" });
+Estado.hasMany(Historicoestado, {
+	as: "historicoestado",
+	foreignKey: "estadoId",
+});
 Historicoestado.belongsTo(Estado, { as: "estado" });
-
 
 Solicitud_Proceso.hasMany(Itemequipo, {
 	as: "itemequipo",

@@ -7,39 +7,28 @@ const Equipos = require("../models/equipos");
 const Analizador = require("../models/analizador");
 const Marca = require("../models/marca");
 const Usuario = require("../models/usuarios");
+const Unidad = require("../models/unidad");
 
-const consultamodelo = async (req, res) => {
-	const modelo = await Modelo.findAll({
+const consultaunidad = async (req, res) => {
+	const unidad = await Unidad.findAll({
 		include: [
-			{
-				/* model: Analizador,
-				as: "instrumento",
-				include: { */
-					model: Marca,
-					as: "marca",
-				//},
-			},
+		
 
-			{
+			/* {
 				model: Usuario,
 				as:"usuario"
-			}
+			} */
 			
 		],
 	});
-	res.json({ ok: true, modelo });
+	res.json({ ok: true, unidad });
 };
 
-const GetIDmodelo = async (req, res) => {
+const GetIDunidad = async (req, res) => {
 	const { id } = req.params;
-	const modeloId = await Modelo.findByPk(id, {
-		include: {
-			model: Analizador,
-			as: "instrumento",
-		},
-	});
+	const unidadId = await Unidad.findByPk(id);
 
-	if (!modeloId) {
+	if (!unidadId) {
 		return res.status(400).json({
 			ok: false,
 			msg: `El id ${id} no existe`,
@@ -47,18 +36,18 @@ const GetIDmodelo = async (req, res) => {
 	}
 	res.status(200).json({
 		ok: true,
-		modeloId,
+		unidadId,
 	});
 };
 
-const GetfiltroModelo = async (req, res) => {
+const Getfiltrounidad = async (req, res) => {
 	const { busquedamodelo } = req.params;
 
 	const dataCA = busquedamodelo.replace(/\w\S*/g, function (e) {
 		return e.charAt(0).toUpperCase() + e.substring(1);
 	});
 
-	const modelo = await Modelo.findAll({
+	const unidad = await Unidad.findAll({
 		where: {
 			NOMBRE: {
 				[Op.like]: `%${dataCA}%`,
@@ -66,62 +55,62 @@ const GetfiltroModelo = async (req, res) => {
 		},
 	});
 
-	res.status(200).json({ ok: true, modelo });
+	res.status(200).json({ ok: true, unidad });
 };
 
-const postmodelo = async (req, res) => {
-	const { NOMBRE, marcaId } = req.body;
+const postunidad = async (req, res) => {
+	const { DESCRIPCION } = req.body;
 	const user = req.usuario;
-	const modelos = new Modelo({ NOMBRE,CREATEDBY:user.id,marcaId,
+	const unidades = new Unidad({ DESCRIPCION,
 		usuarioId:user.id });
 
 
-	await modelos.save();
+	await unidades.save();
 	res.status(201).json({ msg: "Se registro con exito la categoria" });
 };
 
-const modeloUpdate = async (req, res) => {
-	const { id, NOMBRE,marcaId } = req.body;
-	const modeloBD = await Modelo.findByPk(id);
-	if (!modeloBD) {
+const unidadUpdate = async (req, res) => {
+	const { id,  DESCRIPCION} = req.body;
+	const unidadBD = await Unidad.findByPk(id);
+	if (!unidadBD) {
 		return res.status(404).json({
 			ok: false,
 			msg: `No existe el modelo ingresado`,
 		});
 	}
-	await Modelo.update(
+	await Unidad.update(
 		{
-			NOMBRE,marcaId
+			DESCRIPCION
 		},
 		{ where: { id: id } }
 	);
 
 	res.status(200).json({
 		ok: true,
-		msg: `El modelo ${NOMBRE}a sido actualizado con exito..`,
+		msg: `La unidad ${DESCRIPCION}a sido actualizado con exito..`,
 	});
 };
 
-const modeloDelete = async (req, res) => {
+const unidadDelete = async (req, res) => {
 	const { id } = req.params;
-	const modelo = await Modelo.findByPk(id);
+	const unidad = await Unidad.findByPk(id);
 
-	if (!modelo) {
+	if (!unidad) {
 		return res
 			.status(404)
-			.json({ ok: false, msg: `El modelo ingresado no existe` });
+			.json({ ok: false, msg: `La unidad ingresado no existe` });
 	}
-	await modelo.update({ ESTADO: 0 });
+	await unidad.update({ ESTADO: 0 });
 	res.status(200).json({
-		msg: `El modelo ${modelo.NOMBRE} a sido desactivado con exito...`,
+		msg: `La unidad ${unidad.DESCRIPCION} a sido desactivado con exito...`,
 	});
 };
 
 module.exports = {
-	modeloDelete,
-	modeloUpdate,
-	consultamodelo,
-	postmodelo,
-	GetfiltroModelo,
-	GetIDmodelo,
+	unidadDelete,
+	unidadUpdate,
+	consultaunidad,
+	postunidad,
+	Getfiltrounidad,
+	GetIDunidad,
 };
