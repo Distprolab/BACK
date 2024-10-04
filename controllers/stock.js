@@ -593,7 +593,7 @@ const deleteStock = async (req, res) => {
 const getStockPdf = async (req, res) => {
 	//const {id}=req.params;
 	const stock = await ItemStock.findAll({
-		where:{bodegaId:1},
+		where: { bodegaId: 1 },
 		include: [
 			{
 				model: Producto,

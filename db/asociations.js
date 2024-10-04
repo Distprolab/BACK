@@ -93,10 +93,10 @@ Diagnostico.hasMany(Orden, { as: "orden", foreignKey: "diagnosticoId" });
 Orden.belongsTo(Diagnostico, { as: "diagnostico" });
 
 Tiposervicio.hasMany(Orden, { as: "orden", foreignKey: "tiposervicioId" });
-Orden.belongsTo(Tiposervicio, { as: "servicio" });
+Orden.belongsTo(Tiposervicio, { as: "tiposervicio" });
 
 Tipoatencion.hasMany(Orden, { as: "orden", foreignKey: "tipoatencionId" });
-Orden.belongsTo(Tipoatencion, { as: "atencion" });
+Orden.belongsTo(Tipoatencion, { as: "tipoatencion" });
 
 Panel_pruebas.hasMany(Prueba, { as: "prueba", foreignKey: "panelpruebaId" });
 Prueba.belongsTo(Panel_pruebas, { as: "panelprueba" });
